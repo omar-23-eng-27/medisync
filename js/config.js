@@ -7,5 +7,5 @@ window.MEDISYNC_API_URL = (function () {
     return 'http://localhost:3001';
   }
   // ← REPLACE THIS after Railway deployment
-  return 'https://REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app';
+  return 'https://medisync-backend-rnp5.onrender.com';
 }());
