@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>MediSync | Shifts</title>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    var tailwind = tailwind || {}; tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface": "#161a2e",
+            "error": "#ba1a1a",
+            "border-light": "#EEEEEE",
+            "secondary-container": "#e0e0fc",
+            "on-surface-variant": "#4e4351",
+            "surface-container": "#ececff",
+            "on-background": "#161a2e",
+            "primary": "#5e0084",
+            "on-primary": "#ffffff",
+            "background": "#fbf8ff",
+            "surface": "#fbf8ff",
+            "surface-muted": "#F3EBFF",
+            "secondary": "#5b5d74",
+            "on-secondary": "#ffffff",
+            "primary-container": "#7a22a3",
+            "border-secondary": "#DEDFF0",
+            "surface-container-low": "#f3f2ff",
+            "surface-container-lowest": "#ffffff",
+          },
+          fontFamily: {
+            "display": ["Hanken Grotesk", "sans-serif"],
+            "label-md": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Hanken Grotesk"],
+            "headline-md": ["Hanken Grotesk"],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #161a2e; }
+    h1, h2, h3, h4 { font-family: 'Hanken Grotesk', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid #DEDFF0;
+    }
+    .active-pill { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen pb-24">
+
+  <!-- Top App Bar -->
+  <header class="flex justify-between items-center px-4 h-14 w-full fixed top-0 z-50 bg-background/70 backdrop-blur-md border-b border-border-light">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full overflow-hidden border border-border-secondary">
+        <img alt="User Profile" class="w-full h-full object-cover"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVXYi8z28jsODNVxVG9wJGGwioajduvJWvKwR7HComkwG6B4NLkbU2K7Ai7iiDnwkIdEk_v84TRGifNtYQe9u4dwaUGPGFNQ9zf0DhzLWhas1xsKSrMclWvOQXqLaKHVRD56sFxa0IzPt4P5MdXAPO_oc9fOa_ahTn2hP24YcN-rSotiKhfKQhVtQDDKSnOz6JIIF28H_smD7b8L7WaB16ucIZI4VYTZIS_21-3BAeofHvujGMXnhBv0NXNgNUaNR4NHLsCn94Kt0f"/>
+      </div>
+      <a href="index.html">
+        <h1 class="font-display text-lg font-bold text-primary">MediSync</h1>
+      </a>
+    </div>
+    <button class="text-primary hover:opacity-80 transition-opacity p-2 rounded-full active:scale-95">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+  </header>
+
+  <main class="pt-20 px-4 max-w-[1280px] mx-auto">
+
+    <!-- Calendar Header -->
+    <section class="mb-8">
+      <div class="flex justify-between items-end mb-4">
+        <div>
+          <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Schedule</p>
+          <h2 id="month-header" class="font-display text-3xl font-bold text-on-surface">September 2024</h2>
+        </div>
+        <button class="flex items-center gap-1 text-primary text-sm font-semibold py-2 px-4 rounded-lg bg-surface-muted hover:bg-secondary-container transition-colors">
+          <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+          Full View
+        </button>
+      </div>
+
+      <!-- Scrollable date strip (populated by JS) -->
+      <div id="date-strip" class="flex gap-3 overflow-x-auto no-scrollbar py-2"></div>
+    </section>
+
+    <!-- Upcoming Shifts -->
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-2xl font-bold text-on-surface">Upcoming Shifts</h3>
+        <span id="today-count" class="bg-surface-muted text-primary px-3 py-1 rounded-full text-[12px] font-bold">2 TODAY</span>
+      </div>
+
+      <div id="upcoming-shifts-list" class="space-y-4">
+        <!-- Shift Card 1 -->
+        <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-primary">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-secondary-container rounded-xl">
+                <span class="material-symbols-outlined text-primary">medical_services</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-on-surface">Geriatric Care Visit</h4>
+                <p class="text-sm text-on-surface-variant">08:00 AM — 12:00 PM (4h)</p>
+              </div>
+            </div>
+            <span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded">CONFIRMED</span>
+          </div>
+          <div class="flex items-center gap-6 mt-4 pt-4 border-t border-border-light">
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">person</span>
+              <span>Sarah Jenkins</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+              <span>Oakwood Heights</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant ml-auto">
+              <span class="material-symbols-outlined text-[18px]">payments</span>
+              <span class="font-semibold text-on-surface">$32/hr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shift Card 2 -->
+        <div class="bg-white rounded-2xl p-4 border border-border-light shadow-sm hover:shadow-md transition-all border-l-4 border-l-secondary">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-slate-100 rounded-xl">
+                <span class="material-symbols-outlined text-secondary">home_health</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-on-surface">Post-Op Support</h4>
+                <p class="text-sm text-on-surface-variant">02:30 PM — 06:30 PM (4h)</p>
+              </div>
+            </div>
+            <span class="bg-slate-100 text-secondary text-[10px] font-bold px-2 py-1 rounded">STARTING SOON</span>
+          </div>
+          <div class="flex items-center gap-6 mt-4 pt-4 border-t border-border-light">
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">person</span>
+              <span>Robert Chen</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">location_on</span>
+              <span>Downtown Medical</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-on-surface-variant ml-auto">
+              <span class="material-symbols-outlined text-[18px]">payments</span>
+              <span class="font-semibold text-on-surface">$28/hr</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shift Marketplace -->
+    <section class="mb-10">
+      <div class="bg-primary rounded-3xl p-6 text-on-primary mb-6 overflow-hidden relative shadow-2xl">
+        <div class="relative z-10">
+          <h3 class="font-display text-2xl font-bold mb-2">Shift Marketplace</h3>
+          <p class="text-on-primary/80 text-sm mb-5">Pick up extra hours and earn bonuses up to +15% this weekend.</p>
+
+          <!-- Filters -->
+          <div class="flex gap-2 mb-0 overflow-x-auto no-scrollbar">
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-sort="distance">
+              Distance <span class="material-symbols-outlined text-sm">expand_more</span>
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-sort="startTime">
+              Soonest <span class="material-symbols-outlined text-sm">expand_more</span>
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-sort="payRate">
+              Pay Rate <span class="material-symbols-outlined text-sm">filter_list</span>
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-caretype="critical-care">
+              Critical Care
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-caretype="geriatric-care">
+              Geriatric
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-caretype="home-health">
+              Home Health
+            </button>
+            <button class="filter-chip bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1 border border-white/30 hover:bg-white/30 transition-colors whitespace-nowrap" data-caretype="">
+              All Types
+            </button>
+          </div>
+        </div>
+        <!-- Background glow -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-secondary-container opacity-20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+      </div>
+
+      <!-- Marketplace Cards Grid -->
+      <div id="marketplace-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-2xl p-5 border border-border-light hover:border-primary hover:shadow-lg transition-all group">
+          <div class="flex justify-between mb-4">
+            <span class="text-xs font-bold text-primary px-2 py-1 bg-surface-muted rounded">TODAY · 2.4 MI</span>
+            <div class="text-right">
+              <p class="text-lg font-bold text-on-surface">$32/hr</p>
+              <p class="text-[10px] text-green-600 uppercase font-bold tracking-tighter">+ $10 BONUS</p>
+            </div>
+          </div>
+          <h4 class="font-display font-bold text-lg mb-1">Morning Wellness Check</h4>
+          <p class="text-sm text-on-surface-variant mb-1">07:00 AM — 09:00 AM (2h)</p>
+          <div class="flex items-center gap-1 text-xs text-on-surface-variant mb-4">
+            <span class="material-symbols-outlined text-[14px]">location_on</span>
+            Oakwood Heights Assisted Living
+          </div>
+          <button class="claim-btn w-full bg-on-surface text-white py-3 rounded-xl font-semibold text-sm group-hover:bg-primary transition-colors flex items-center justify-center gap-2">
+            Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>
+          </button>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-2xl p-5 border border-border-light hover:border-primary hover:shadow-lg transition-all group">
+          <div class="flex justify-between mb-4">
+            <span class="text-xs font-bold text-on-surface-variant px-2 py-1 bg-slate-100 rounded">TOMORROW · 5.1 MI</span>
+            <div class="text-right">
+              <p class="text-lg font-bold text-on-surface">$28/hr</p>
+              <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-tighter">BASE RATE</p>
+            </div>
+          </div>
+          <h4 class="font-display font-bold text-lg mb-1">Full-Day Private Duty</h4>
+          <p class="text-sm text-on-surface-variant mb-1">09:00 AM — 05:00 PM (8h)</p>
+          <div class="flex items-center gap-1 text-xs text-on-surface-variant mb-4">
+            <span class="material-symbols-outlined text-[14px]">location_on</span>
+            Broadway Residential Care
+          </div>
+          <button class="claim-btn w-full bg-on-surface text-white py-3 rounded-xl font-semibold text-sm group-hover:bg-primary transition-colors flex items-center justify-center gap-2">
+            Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>
+          </button>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white rounded-2xl p-5 border border-border-light hover:border-primary hover:shadow-lg transition-all group">
+          <div class="flex justify-between mb-4">
+            <span class="text-xs font-bold text-primary px-2 py-1 bg-surface-muted rounded">SAT · 1.8 MI</span>
+            <div class="text-right">
+              <p class="text-lg font-bold text-on-surface">$35/hr</p>
+              <p class="text-[10px] text-green-600 uppercase font-bold tracking-tighter">WEEKEND +15%</p>
+            </div>
+          </div>
+          <h4 class="font-display font-bold text-lg mb-1">Weekend ICU Support</h4>
+          <p class="text-sm text-on-surface-variant mb-1">06:00 AM — 06:00 PM (12h)</p>
+          <div class="flex items-center gap-1 text-xs text-on-surface-variant mb-4">
+            <span class="material-symbols-outlined text-[14px]">location_on</span>
+            Mercy General Hospital
+          </div>
+          <button class="claim-btn w-full bg-on-surface text-white py-3 rounded-xl font-semibold text-sm group-hover:bg-primary transition-colors flex items-center justify-center gap-2">
+            Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>
+          </button>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white rounded-2xl p-5 border border-border-light hover:border-primary hover:shadow-lg transition-all group">
+          <div class="flex justify-between mb-4">
+            <span class="text-xs font-bold text-on-surface-variant px-2 py-1 bg-slate-100 rounded">MON · 3.2 MI</span>
+            <div class="text-right">
+              <p class="text-lg font-bold text-on-surface">$30/hr</p>
+              <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-tighter">BASE RATE</p>
+            </div>
+          </div>
+          <h4 class="font-display font-bold text-lg mb-1">Home Companion Care</h4>
+          <p class="text-sm text-on-surface-variant mb-1">10:00 AM — 04:00 PM (6h)</p>
+          <div class="flex items-center gap-1 text-xs text-on-surface-variant mb-4">
+            <span class="material-symbols-outlined text-[14px]">location_on</span>
+            Elmwood Heights
+          </div>
+          <button class="claim-btn w-full bg-on-surface text-white py-3 rounded-xl font-semibold text-sm group-hover:bg-primary transition-colors flex items-center justify-center gap-2">
+            Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 pt-2 bg-surface shadow-lg rounded-t-xl border-t border-border-light">
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container/50 rounded-xl transition-all" href="dashboard.html">
+      <span class="material-symbols-outlined">home</span>
+      <span class="text-[11px] font-semibold">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-secondary-container text-on-surface rounded-2xl px-4 py-1 transition-all active:scale-90" href="shifts.html">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span>
+      <span class="text-[11px] font-semibold">Shifts</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container/50 rounded-xl transition-all" href="referrals.html">
+      <span class="material-symbols-outlined">group_add</span>
+      <span class="text-[11px] font-semibold">Referrals</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container/50 rounded-xl transition-all" href="profile.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[11px] font-semibold">Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    api.requireAuth();
+
+    let allUpcoming = [];
+    let activeSort = 'startTime';
+    let activeCareType = '';
+    let selectedDate = new Date().toDateString();
+
+    // ── Month header & date strip ───────────────────────────────────────────
+    function buildDateStrip() {
+      const header = document.getElementById('month-header');
+      const strip  = document.getElementById('date-strip');
+      const today  = new Date();
+      if (header) header.textContent = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (!strip) return;
+
+      strip.innerHTML = '';
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const isToday = i === 0;
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum  = d.getDate();
+
+        const btn = document.createElement('button');
+        btn.className = isToday
+          ? 'date-pill flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-2xl bg-primary text-on-primary shadow-lg scale-110 mx-1'
+          : 'date-pill flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-2xl bg-surface border border-border-light hover:border-primary/30 transition-colors';
+        btn.dataset.dateStr = d.toDateString();
+        btn.innerHTML = `
+          <span class="text-[11px] font-semibold ${isToday ? 'opacity-80' : 'text-on-surface-variant'}">${dayName}</span>
+          <span class="text-lg font-bold">${dayNum}</span>
+          ${isToday ? '<div class="w-1 h-1 bg-white rounded-full mt-1"></div>' : ''}`;
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.date-pill').forEach(p => {
+            p.classList.remove('bg-primary', 'text-on-primary', 'shadow-lg', 'scale-110', 'mx-1');
+            p.classList.add('bg-surface', 'border', 'border-border-light', 'text-on-surface');
+            p.querySelector('.text-lg').classList.remove('text-on-primary');
+            const dot = p.querySelector('.w-1');
+            if (dot) dot.remove();
+          });
+          this.classList.remove('bg-surface', 'border', 'border-border-light');
+          this.classList.add('bg-primary', 'text-on-primary', 'shadow-lg', 'scale-110', 'mx-1');
+          selectedDate = this.dataset.dateStr;
+          filterAndRenderUpcoming();
+        });
+        strip.appendChild(btn);
+      }
+    }
+
+    function filterAndRenderUpcoming() {
+      const filtered = allUpcoming.filter(s =>
+        !selectedDate || new Date(s.startTime).toDateString() === selectedDate
+      );
+      renderUpcomingShifts(filtered, false);
+    }
+
+    // ── Date pill selection (OLD — kept for fallback) ───────────────────────
+    const datePills = document.querySelectorAll('.date-pill');
+    datePills.forEach(pill => {
+      pill.addEventListener('click', function() {
+        datePills.forEach(p => {
+          p.classList.remove('bg-primary', 'text-on-primary', 'shadow-lg', 'scale-110', 'mx-1');
+          p.classList.add('bg-surface', 'border', 'border-border-light');
+          const dot = p.querySelector('.w-1');
+          if (dot) dot.remove();
+        });
+        this.classList.remove('bg-surface', 'border', 'border-border-light');
+        this.classList.add('bg-primary', 'text-on-primary', 'shadow-lg', 'scale-110', 'mx-1');
+        const dot = document.createElement('div');
+        dot.className = 'w-1 h-1 bg-white rounded-full mt-1';
+        this.appendChild(dot);
+      });
+    });
+
+    // ── Filter chips ────────────────────────────────────────────────────────
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('.filter-chip').forEach(c => {
+          c.classList.remove('bg-white', 'text-primary');
+          c.classList.add('bg-white/20');
+        });
+        this.classList.remove('bg-white/20');
+        this.classList.add('bg-white', 'text-primary');
+
+        if (this.dataset.sort) activeSort = this.dataset.sort;
+        if (this.dataset.caretype !== undefined) activeCareType = this.dataset.caretype;
+
+        const params = { sort: activeSort };
+        if (activeCareType) params.careType = activeCareType;
+        api.getMarketplace(params)
+          .then(data => renderMarketplace(data.shifts || []))
+          .catch(err => showToast(err.message, 'error'));
+      });
+    });
+
+    // ── Render upcoming shifts ──────────────────────────────────────────────
+    function renderUpcomingShifts(shifts, updateBadge = true) {
+      const container = document.getElementById('upcoming-shifts-list');
+      const badge = document.getElementById('today-count');
+      if (!container) return;
+
+      if (updateBadge) {
+        const todayStr = new Date().toDateString();
+        const todayCount = shifts.filter(s => new Date(s.startTime).toDateString() === todayStr).length;
+        if (badge) badge.textContent = `${todayCount} TODAY`;
+      }
+
+      if (shifts.length === 0) {
+        container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-6">No upcoming shifts. Check the marketplace below!</p>';
+        return;
+      }
+
+      container.innerHTML = shifts.map(s => {
+        const statusLabel = { confirmed: 'CONFIRMED', active: 'ACTIVE', pending: 'STARTING SOON' }[s.status] || s.status.toUpperCase();
+        const statusCls = s.status === 'confirmed' ? 'bg-primary/10 text-primary' : s.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-secondary';
+        return `
+          <div class="glass-card rounded-2xl p-4 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-primary">
+            <div class="flex justify-between items-start mb-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-secondary-container rounded-xl">
+                  <span class="material-symbols-outlined text-primary">medical_services</span>
+                </div>
+                <div>
+                  <h4 class="font-bold text-on-surface">${s.title}</h4>
+                  <p class="text-sm text-on-surface-variant">${fmtTime(s.startTime)} — ${fmtTime(s.endTime)} (${fmtDuration(s.startTime, s.endTime)})</p>
+                </div>
+              </div>
+              <span class="${statusCls} text-[10px] font-bold px-2 py-1 rounded">${statusLabel}</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-border-light">
+              <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-[18px]">apartment</span>
+                <span>${s.facility.name}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                <span>${fmtDate(s.startTime)}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-on-surface-variant ml-auto">
+                <span class="material-symbols-outlined text-[18px]">payments</span>
+                <span class="font-semibold text-on-surface">$${s.hourlyRate}/hr</span>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Render marketplace ──────────────────────────────────────────────────
+    function renderMarketplace(shifts) {
+      const grid = document.getElementById('marketplace-grid');
+      if (!grid) return;
+
+      if (shifts.length === 0) {
+        grid.innerHTML = '<p class="text-sm text-on-surface-variant col-span-3 text-center py-8">No open shifts available. Check back soon!</p>';
+        return;
+      }
+
+      grid.innerHTML = shifts.map(s => {
+        const hasBonus = s.bonusAmount && s.bonusAmount > 0;
+        const bonusLabel = hasBonus ? `+$${s.bonusAmount} BONUS` : 'BASE RATE';
+        const bonusCls = hasBonus ? 'text-green-600' : 'text-on-surface-variant';
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-border-light hover:border-primary hover:shadow-lg transition-all group">
+            <div class="flex justify-between mb-4">
+              <span class="text-xs font-bold text-primary px-2 py-1 bg-surface-muted rounded">${fmtDate(s.startTime).toUpperCase()}</span>
+              <div class="text-right">
+                <p class="text-lg font-bold text-on-surface">$${s.hourlyRate}/hr</p>
+                <p class="text-[10px] ${bonusCls} uppercase font-bold tracking-tighter">${bonusLabel}</p>
+              </div>
+            </div>
+            <h4 class="font-display font-bold text-lg mb-1">${s.title}</h4>
+            <p class="text-sm text-on-surface-variant mb-1">${fmtTime(s.startTime)} — ${fmtTime(s.endTime)} (${fmtDuration(s.startTime, s.endTime)})</p>
+            <div class="flex items-center gap-1 text-xs text-on-surface-variant mb-4">
+              <span class="material-symbols-outlined text-[14px]">location_on</span>
+              ${s.facility.name}
+            </div>
+            <button class="claim-btn w-full bg-on-surface text-white py-3 rounded-xl font-semibold text-sm group-hover:bg-primary transition-colors flex items-center justify-center gap-2"
+                    data-shift-id="${s.id}">
+              Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>
+            </button>
+          </div>`;
+      }).join('');
+
+      grid.querySelectorAll('.claim-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const shiftId = this.dataset.shiftId;
+          this.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;" class="material-symbols-outlined">sync</span>&nbsp;Claiming...';
+          this.disabled = true;
+          try {
+            await api.claimShift(shiftId);
+            this.innerHTML = '<span class="material-symbols-outlined">check_circle</span>&nbsp;Shift Claimed!';
+            this.classList.remove('bg-on-surface', 'group-hover:bg-primary');
+            this.classList.add('bg-green-600');
+            showToast('Shift claimed! Check your upcoming shifts.');
+          } catch (err) {
+            showToast(err.message, 'error');
+            this.innerHTML = 'Claim Shift <span class="material-symbols-outlined text-[18px]">add_task</span>';
+            this.disabled = false;
+          }
+        });
+      });
+    }
+
+    // ── Load data ───────────────────────────────────────────────────────────
+    async function loadShifts() {
+      try {
+        const [upcoming, market] = await Promise.all([
+          api.getUpcomingShifts(),
+          api.getMarketplace(),
+        ]);
+        allUpcoming = upcoming.shifts || [];
+        renderUpcomingShifts(allUpcoming);
+        renderMarketplace(market.shifts || []);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    buildDateStrip();
+    loadShifts();
+  </script>
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

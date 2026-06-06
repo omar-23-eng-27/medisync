@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  password       String
+  name           String
+  role           String   @default("caregiver") // caregiver | admin
+  specialization String?
+  yearsExperience Int?
+  bio            String?
+  points         Int      @default(0)
+  rating         Float    @default(0)
+  ratingCount    Int      @default(0)
+  referralCode   String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  shiftClaims      ShiftClaim[]
+  credentials      Credential[]
+  referralsGiven   Referral[]         @relation("Referrer")
+  referralsReceived Referral[]        @relation("Referee")
+  pointTransactions PointTransaction[]
+}
+
+model Facility {
+  id      String  @id @default(uuid())
+  name    String
+  address String
+  city    String
+  lat     Float?
+  lng     Float?
+  rating  Float   @default(4.5)
+  type    String  @default("hospital") // hospital | assisted-living | home-care
+
+  shifts  Shift[]
+}
+
+model Shift {
+  id          String   @id @default(uuid())
+  facilityId  String
+  title       String
+  careType    String   // geriatric | critical-care | pediatric | home-health | post-op | general
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  hourlyRate  Float
+  bonusAmount Float    @default(0)
+  distance    Float?   // miles from reference point
+  totalSlots  Int      @default(1)
+  status      String   @default("open") // open | filled | cancelled | completed
+  createdAt   DateTime @default(now())
+
+  facility Facility     @relation(fields: [facilityId], references: [id])
+  claims   ShiftClaim[]
+}
+
+model ShiftClaim {
+  id         String    @id @default(uuid())
+  shiftId    String
+  userId     String
+  status     String    @default("claimed") // claimed | confirmed | active | completed | cancelled
+  clockInAt  DateTime?
+  clockOutAt DateTime?
+  hoursWorked Float?
+  pointsEarned Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  shift Shift @relation(fields: [shiftId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([shiftId, userId])
+}
+
+model Referral {
+  id            String   @id @default(uuid())
+  referrerId    String
+  refereeEmail  String
+  refereeName   String
+  refereeSpecialization String?
+  refereeId     String?
+  status        String   @default("pending") // pending | verified | completed
+  pointsAwarded Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  referrer User  @relation("Referrer", fields: [referrerId], references: [id])
+  referee  User? @relation("Referee", fields: [refereeId], references: [id])
+
+  @@unique([referrerId, refereeEmail])
+}
+
+model Credential {
+  id         String    @id @default(uuid())
+  userId     String
+  type       String    // rn-license | acls | bls | tb-test | background-check | cna | lpn
+  label      String
+  status     String    @default("active") // active | expiring | expired | pending
+  expiryDate DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model PointTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  points    Int
+  reason    String   // shift-completed | referral-bonus | rating-bonus | survey | signup-bonus
+  shiftId   String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

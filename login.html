@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediSync | Sign In</title>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="js/config.js"></script>
+  <script src="js/api.js" defer></script>
+  <script>
+    var tailwind = tailwind || {}; tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#5e0084",
+            "on-primary": "#ffffff",
+            "background": "#fbf8ff",
+            "on-surface": "#161a2e",
+            "on-surface-variant": "#4e4351",
+            "surface-muted": "#F3EBFF",
+            "surface-container-low": "#f3f2ff",
+            "secondary-container": "#e0e0fc",
+            "border-light": "#EEEEEE",
+            "border-secondary": "#DEDFF0",
+            "error": "#ba1a1a",
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #161a2e; }
+    h1, h2, h3 { font-family: 'Hanken Grotesk', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .hero-gradient { background: linear-gradient(135deg, #5e0084 0%, #8d2955 100%); }
+    .tab-active { background: #5e0084; color: #fff; }
+    .tab-inactive { background: transparent; color: #4e4351; }
+    .input-field {
+      width: 100%; padding: 0 16px; height: 52px; border-radius: 10px;
+      border: 1px solid #EEEEEE; outline: none; font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: white;
+    }
+    .input-field:focus {
+      border-color: #5e0084;
+      box-shadow: 0 0 0 3px rgba(94, 0, 132, 0.08);
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+  </style>
+</head>
+<body class="min-h-screen flex">
+
+  <!-- Left panel (desktop only) -->
+  <div class="hidden lg:flex lg:w-1/2 hero-gradient flex-col justify-between p-12 relative overflow-hidden">
+    <!-- Decorative circles -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-16 -mb-16 blur-3xl pointer-events-none"></div>
+
+    <!-- Logo -->
+    <div class="flex items-center gap-2 relative z-10">
+      <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+      </div>
+      <span class="text-white font-display text-2xl font-bold tracking-tight" style="font-family: 'Hanken Grotesk', sans-serif;">MediSync</span>
+    </div>
+
+    <!-- Quote -->
+    <div class="relative z-10">
+      <h2 class="text-white font-bold mb-4 leading-tight tracking-tight" style="font-family:'Hanken Grotesk',sans-serif; font-size:40px; line-height:1.1;">
+        Coordinate Care.<br>Reward Excellence.
+      </h2>
+      <p class="text-white/75 text-lg leading-relaxed max-w-sm">
+        Join 10,000+ caregivers earning rewards for every shift, every referral, every star rating.
+      </p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="flex gap-8 relative z-10">
+      <div>
+        <p class="text-white font-bold text-3xl" style="font-family:'Hanken Grotesk',sans-serif;">95%</p>
+        <p class="text-white/60 text-sm">Shift fill rate</p>
+      </div>
+      <div>
+        <p class="text-white font-bold text-3xl" style="font-family:'Hanken Grotesk',sans-serif;">$500</p>
+        <p class="text-white/60 text-sm">Avg referral bonus</p>
+      </div>
+      <div>
+        <p class="text-white font-bold text-3xl" style="font-family:'Hanken Grotesk',sans-serif;">4.9★</p>
+        <p class="text-white/60 text-sm">Platform rating</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel (auth forms) -->
+  <div class="flex-1 flex flex-col items-center justify-center px-6 py-12 min-h-screen">
+    <!-- Mobile logo -->
+    <div class="flex items-center gap-2 mb-8 lg:hidden">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+      </div>
+      <span class="font-bold text-primary text-xl" style="font-family:'Hanken Grotesk',sans-serif;">MediSync</span>
+    </div>
+
+    <div class="w-full max-w-[400px] fade-up">
+      <h1 class="text-3xl font-bold text-on-surface mb-2" style="font-family:'Hanken Grotesk',sans-serif;">Welcome back</h1>
+      <p class="text-on-surface-variant text-sm mb-8">Sign in to your account or create a new one.</p>
+
+      <!-- Tabs -->
+      <div class="flex gap-1 bg-surface-container-low rounded-xl p-1 mb-8">
+        <button id="tab-login" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-active" onclick="switchTab('login')">Sign In</button>
+        <button id="tab-register" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-inactive" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- Error banner -->
+      <div id="error-banner" class="hidden mb-5 flex items-start gap-2 bg-red-50 border border-red-200 text-error rounded-xl p-4 text-sm font-medium">
+        <span class="material-symbols-outlined text-[18px] mt-0.5">error</span>
+        <span id="error-text"></span>
+      </div>
+
+      <!-- Login form -->
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email</label>
+          <input class="input-field" type="email" id="login-email" placeholder="sarah@hospital.com" autocomplete="email" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Password</label>
+          <input class="input-field" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+        <button type="submit" id="login-btn"
+                class="w-full h-14 bg-primary text-white rounded-xl font-bold text-base hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+          Sign In
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </form>
+
+      <!-- Register form (hidden by default) -->
+      <form id="register-form" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Full Name</label>
+          <input class="input-field" type="text" id="reg-name" placeholder="Sarah Jenkins" autocomplete="name" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email</label>
+          <input class="input-field" type="email" id="reg-email" placeholder="sarah@hospital.com" autocomplete="email" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Password</label>
+          <input class="input-field" type="password" id="reg-password" placeholder="Min. 8 characters" autocomplete="new-password" required minlength="8">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Specialization (optional)</label>
+          <select class="input-field appearance-none" id="reg-specialization">
+            <option value="">Select specialization</option>
+            <option>Critical Care</option>
+            <option>Emergency Medicine</option>
+            <option>Pediatrics</option>
+            <option>Geriatric Care</option>
+            <option>Home Health</option>
+            <option>General Nursing</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">Referral Code (optional)</label>
+          <input class="input-field" type="text" id="reg-referral" placeholder="e.g. SARAH500" autocomplete="off">
+        </div>
+        <button type="submit" id="register-btn"
+                class="w-full h-14 bg-primary text-white rounded-xl font-bold text-base hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+          Create Account
+          <span class="material-symbols-outlined">person_add</span>
+        </button>
+      </form>
+
+      <!-- Demo credentials hint -->
+      <div class="mt-6 p-4 bg-surface-muted rounded-xl border border-border-secondary">
+        <p class="text-xs text-on-surface-variant font-semibold mb-1">Demo Credentials</p>
+        <p class="text-xs text-on-surface"><span class="font-bold">Email:</span> sarah@medisync.dev</p>
+        <p class="text-xs text-on-surface"><span class="font-bold">Password:</span> Password123!</p>
+        <button onclick="fillDemo()" class="mt-2 text-xs text-primary font-bold hover:underline">Fill demo credentials →</button>
+      </div>
+
+      <p class="mt-6 text-center text-xs text-on-surface-variant">
+        <a href="index.html" class="hover:text-primary transition-colors">← Back to home</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    window.addEventListener('DOMContentLoaded', () => {
+      if (api.isAuthenticated()) window.location.href = 'dashboard.html';
+    });
+
+    function switchTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const tabLogin = document.getElementById('tab-login');
+      const tabReg = document.getElementById('tab-register');
+      hideError();
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-active';
+        tabReg.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-inactive';
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabLogin.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-inactive';
+        tabReg.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all tab-active';
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-banner').classList.remove('hidden');
+    }
+
+    function hideError() {
+      document.getElementById('error-banner').classList.add('hidden');
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;" class="material-symbols-outlined">sync</span>&nbsp;Please wait...';
+        btn.disabled = true;
+        btn.classList.add('opacity-75');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-75');
+      }
+    }
+
+    function fillDemo() {
+      document.getElementById('login-email').value = 'sarah@medisync.dev';
+      document.getElementById('login-password').value = 'Password123!';
+      switchTab('login');
+    }
+
+    // Login
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+      const btn = document.getElementById('login-btn');
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      setLoading(btn, true);
+      try {
+        await api.login(email, password);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showError(err.message);
+        btn.innerHTML = 'Sign In <span class="material-symbols-outlined">arrow_forward</span>';
+        setLoading(btn, false);
+      }
+    });
+
+    // Register
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+      const btn = document.getElementById('register-btn');
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const specialization = document.getElementById('reg-specialization').value;
+      const referralCode = document.getElementById('reg-referral').value.trim();
+
+      setLoading(btn, true);
+      try {
+        await api.register(name, email, password, specialization, referralCode);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showError(err.message);
+        btn.innerHTML = 'Create Account <span class="material-symbols-outlined">person_add</span>';
+        setLoading(btn, false);
+      }
+    });
+  </script>
+  <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+</body>
+</html>

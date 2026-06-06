@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>MediSync | Referrals &amp; Rewards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <script id="tailwind-config">
+    var tailwind = tailwind || {}; tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface": "#161a2e",
+            "error": "#ba1a1a",
+            "border-light": "#EEEEEE",
+            "secondary-container": "#e0e0fc",
+            "on-surface-variant": "#4e4351",
+            "inverse-on-surface": "#f0efff",
+            "surface-container": "#ececff",
+            "surface-variant": "#dee1fd",
+            "outline": "#807382",
+            "on-tertiary-fixed": "#3e001f",
+            "surface-bright": "#fbf8ff",
+            "on-primary-fixed": "#310048",
+            "primary": "#5e0084",
+            "on-secondary-fixed": "#181a2e",
+            "secondary-fixed-dim": "#c3c4df",
+            "bg-alternate": "#FAF8FC",
+            "tertiary-container": "#8d2955",
+            "on-primary": "#ffffff",
+            "background": "#fbf8ff",
+            "tertiary": "#6f0e3e",
+            "outline-variant": "#d1c2d3",
+            "primary-fixed-dim": "#e9b3ff",
+            "on-background": "#161a2e",
+            "on-secondary-container": "#61637a",
+            "surface-tint": "#8b35b3",
+            "on-tertiary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#821f4c",
+            "on-primary-fixed-variant": "#701499",
+            "on-primary-container": "#e7acff",
+            "inverse-surface": "#2b2f44",
+            "surface": "#fbf8ff",
+            "surface-dim": "#d6d8f4",
+            "surface-muted": "#F3EBFF",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#f7d8ff",
+            "tertiary-fixed-dim": "#ffb0ca",
+            "surface-container-low": "#f3f2ff",
+            "surface-container-lowest": "#ffffff",
+            "error-container": "#ffdad6",
+            "surface-container-highest": "#dee1fd",
+            "border-secondary": "#DEDFF0",
+            "on-error": "#ffffff",
+            "surface-container-high": "#e5e6ff",
+            "on-tertiary-container": "#ffa9c6",
+            "on-secondary-fixed-variant": "#43455b",
+            "inverse-primary": "#e9b3ff",
+            "secondary": "#5b5d74",
+            "tertiary-fixed": "#ffd9e3",
+            "primary-container": "#7a22a3"
+          },
+          fontFamily: {
+            "display": ["Hanken Grotesk", "sans-serif"],
+            "label-md": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Hanken Grotesk"],
+            "headline-md": ["Hanken Grotesk"],
+            "headline-lg": ["Hanken Grotesk"],
+            "display-lg": ["Hanken Grotesk"],
+          },
+          fontSize: {
+            "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+            "display-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-lg": ["20px", {"lineHeight": "32px", "fontWeight": "400"}],
+            "headline-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #161a2e; }
+    h1, h2, h3, h4 { font-family: 'Hanken Grotesk', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid #DEDFF0; }
+    .hero-gradient { background: linear-gradient(135deg, #5e0084 0%, #8d2955 100%); }
+    .floating-glow { filter: blur(60px); opacity: 0.15; position: absolute; z-index: -1; border-radius: 50%; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+
+  <!-- Top App Bar -->
+  <header class="flex justify-between items-center px-4 h-14 w-full fixed top-0 z-50 bg-background/70 backdrop-blur-md border-b border-border-light">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+        <img alt="User Profile" class="w-full h-full object-cover"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrthc-IspfTnmr9gvhuM9D2Wt30AzGGI5OSobtSvZBRmzjpmRQzey9AUfJbD_0ZiMyR_Cj5SVlyZfO3x9QhZx8HWMJ9z92pwJqATthFvK1WwTHlGzca-ArSNKIeFu6crewygywn3deU_uK7cHvXDRkAnOeY4GIBtZ4DVbzMGCF8JdaZ3QPGZbEbxGG_kUpSJoEoYhen3GzUFEfxLBUN1I_8auyxK-zHB54b-V9QkDN8QrXvBIMM6OkqbnNV18EFs-Gk-sWjKfQ1z6Z"/>
+      </div>
+      <a href="index.html">
+        <span class="font-display text-lg font-bold text-primary">MediSync</span>
+      </a>
+    </div>
+    <button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity p-2">notifications</button>
+  </header>
+
+  <main class="pt-20 pb-32 px-4 max-w-[1280px] mx-auto relative overflow-hidden">
+    <!-- Ambient glows -->
+    <div class="floating-glow bg-primary w-[300px] h-[300px] top-20 -left-20"></div>
+    <div class="floating-glow top-40 right-[-80px] w-[250px] h-[250px]" style="background:#8d2955;"></div>
+
+    <!-- Points Hero Card -->
+    <section class="mb-12">
+      <div class="hero-gradient rounded-3xl p-8 text-on-primary shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <span class="text-on-primary/80 text-xs font-bold uppercase tracking-wider">Your Rewards Wallet</span>
+            <h1 id="total-points" class="font-display font-bold mt-2 mb-1" style="font-size: 64px; line-height: 72px; letter-spacing: -0.02em;">12,450</h1>
+            <p class="text-on-primary/90 text-xl">Total MediPoints Earned</p>
+          </div>
+          <div class="flex gap-4">
+            <div class="glass-card bg-white/20 border-white/20 p-4 rounded-2xl flex items-center gap-4 animate-float">
+              <div class="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center">
+                <span class="material-symbols-outlined text-on-primary">military_tech</span>
+              </div>
+              <div>
+                <p class="text-xs text-on-primary/70 font-semibold">Next Tier</p>
+                <p class="font-display text-xl font-bold text-on-primary">Platinum</p>
+              </div>
+            </div>
+            <div class="hidden md:flex glass-card bg-white/20 border-white/20 p-4 rounded-2xl items-center gap-4 animate-float" style="animation-delay: 1s;">
+              <div class="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center">
+                <span class="material-symbols-outlined text-on-primary">redeem</span>
+              </div>
+              <div>
+                <p class="text-xs text-on-primary/70 font-semibold">Redeemable</p>
+                <p id="redeemable-usd" class="font-display text-xl font-bold text-on-primary">$124.50</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress to Platinum -->
+        <div class="relative z-10 mt-6 pt-6 border-t border-white/20">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs text-on-primary/70 font-semibold">Progress to Platinum Tier</span>
+            <span id="tier-progress-text" class="text-xs font-bold">12,450 / 15,000 pts</span>
+          </div>
+          <div class="w-full bg-white/20 rounded-full h-2">
+            <div id="tier-progress-bar" class="bg-white h-2 rounded-full" style="width: 83%"></div>
+          </div>
+          <p id="tier-remaining-text" class="text-xs text-on-primary/70 mt-1.5">2,550 more points to unlock Platinum benefits</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Referral Form -->
+      <section class="lg:col-span-5">
+        <div class="bg-surface-container-lowest rounded-3xl p-8 border border-border-light shadow-sm sticky top-24">
+          <div class="mb-8">
+            <span class="bg-surface-muted text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block">Grow Your Network</span>
+            <h2 class="font-display text-3xl font-bold text-on-surface mb-2">Refer a Colleague</h2>
+            <p class="text-on-surface-variant text-sm leading-relaxed">Help your friends find their next dream shift and earn 5,000 points when they complete their first rotation.</p>
+          </div>
+
+          <form class="space-y-5" id="referralForm">
+            <div>
+              <label class="text-xs font-bold uppercase tracking-wider text-on-surface block mb-2">Colleague's Full Name</label>
+              <input class="w-full px-4 h-14 rounded-xl border border-border-light focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-white text-on-surface"
+                     placeholder="Dr. Sarah Smith" type="text" id="ref-name" required/>
+            </div>
+            <div>
+              <label class="text-xs font-bold uppercase tracking-wider text-on-surface block mb-2">Email Address</label>
+              <input class="w-full px-4 h-14 rounded-xl border border-border-light focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-white text-on-surface"
+                     placeholder="sarah.s@hospital.com" type="email" id="ref-email" required/>
+            </div>
+            <div>
+              <label class="text-xs font-bold uppercase tracking-wider text-on-surface block mb-2">Specialization (Optional)</label>
+              <select id="ref-spec" class="w-full px-4 h-14 rounded-xl border border-border-light focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none appearance-none transition-all bg-white text-on-surface">
+                <option>Select Specialization</option>
+                <option>Emergency Medicine</option>
+                <option>Critical Care</option>
+                <option>Pediatrics</option>
+                <option>Geriatric Care</option>
+                <option>General Nursing</option>
+                <option>Home Health</option>
+              </select>
+            </div>
+
+            <!-- Referral code copy -->
+            <div>
+              <label class="text-xs font-bold uppercase tracking-wider text-on-surface block mb-2">Your Referral Code</label>
+              <div class="flex gap-2">
+                <input class="flex-1 px-4 h-12 rounded-xl border border-border-light bg-surface-muted text-primary font-bold text-sm outline-none"
+                       readonly type="text" value="MEDISYNC-SARAH-500" id="referralCode"/>
+                <button type="button" id="copyCodeBtn"
+                        class="px-4 h-12 rounded-xl border border-border-light bg-white text-primary font-bold text-sm hover:bg-surface-muted transition-colors flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            <button class="w-full h-14 bg-primary text-on-primary rounded-xl font-display font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2" type="submit">
+              <span class="material-symbols-outlined">send</span>
+              Send Invitation
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Referral History -->
+      <section class="lg:col-span-7">
+        <div class="bg-surface-container-lowest rounded-3xl p-8 border border-border-light shadow-sm">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="font-display text-3xl font-bold text-on-surface">Referral History</h2>
+            <button id="leaderboard-btn" class="flex items-center gap-2 text-primary font-semibold text-sm hover:underline">
+              <span>View Leaderboard</span>
+              <span class="material-symbols-outlined text-sm">trending_up</span>
+            </button>
+          </div>
+
+          <div id="referral-history" class="space-y-4">
+            <!-- Entry 1: Pending -->
+            <div class="flex items-center justify-between p-5 rounded-2xl bg-background border border-border-light hover:border-primary/30 transition-colors group">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-surface-muted flex items-center justify-center text-primary font-bold">JD</div>
+                <div>
+                  <h3 class="font-semibold text-on-surface text-sm">Jameson Doherty</h3>
+                  <p class="text-sm text-on-surface-variant">Invited 2 days ago</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-secondary-fixed-variant font-semibold text-[11px] uppercase">Pending</span>
+                <span class="text-primary font-bold text-sm">+5,000 pts</span>
+              </div>
+            </div>
+
+            <!-- Entry 2: Verified -->
+            <div class="flex items-center justify-between p-5 rounded-2xl bg-background border border-border-light hover:border-primary/30 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-primary font-bold">AL</div>
+                <div>
+                  <h3 class="font-semibold text-on-surface text-sm">Amara Ling</h3>
+                  <p class="text-sm text-on-surface-variant">Invited 2 weeks ago</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-[11px] uppercase">Verified</span>
+                <span class="text-primary font-bold text-sm">+5,000 pts</span>
+              </div>
+            </div>
+
+            <!-- Entry 3: Bonus Paid -->
+            <div class="flex items-center justify-between p-5 rounded-2xl bg-white border-2 border-primary/20 shadow-md">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold">MT</div>
+                <div>
+                  <h3 class="font-semibold text-on-surface text-sm">Marcus Thorne</h3>
+                  <p class="text-sm text-on-surface-variant">Completed 1st Shift</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-[11px] uppercase flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">check_circle</span> Bonus Paid
+                </span>
+                <span class="text-primary font-bold text-sm">+5,000 pts</span>
+              </div>
+            </div>
+
+            <!-- Entry 4: Bonus Paid -->
+            <div class="flex items-center justify-between p-5 rounded-2xl bg-white border-2 border-primary/20 shadow-md">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold">RK</div>
+                <div>
+                  <h3 class="font-semibold text-on-surface text-sm">Rowan Kim</h3>
+                  <p class="text-sm text-on-surface-variant">Completed 3rd Shift</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-[11px] uppercase flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">check_circle</span> Bonus Paid
+                </span>
+                <span class="text-primary font-bold text-sm">+5,000 pts</span>
+              </div>
+            </div>
+
+            <!-- Encouragement state -->
+            <div class="mt-6 pt-6 border-t border-border-light">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-full bg-surface-muted flex items-center justify-center mb-4">
+                  <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">celebration</span>
+                </div>
+                <h4 class="font-display text-xl font-bold text-on-surface mb-2">You're doing great!</h4>
+                <p class="text-on-surface-variant text-sm max-w-md leading-relaxed">Every referral strengthens our clinical community and puts rewards in your pocket. Keep sharing your code!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rewards Redemption Card -->
+        <div class="mt-6 bg-secondary-container rounded-3xl p-6 border border-border-secondary">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="font-display text-xl font-bold text-on-surface mb-1">Redeem Your Points</h3>
+              <p class="text-on-surface-variant text-sm">100 MediPoints = $1.00 cashback</p>
+            </div>
+            <span class="material-symbols-outlined text-primary text-3xl">redeem</span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="redeem-amount-btn bg-white rounded-xl p-3 text-center hover:shadow-md transition-shadow border border-border-light hover:border-primary/30" data-points="2500">
+              <p class="redeem-label font-display font-bold text-lg text-primary">$25</p>
+              <p class="redeem-pts text-xs text-on-surface-variant font-medium">2,500 pts</p>
+            </button>
+            <button class="redeem-amount-btn bg-white rounded-xl p-3 text-center hover:shadow-md transition-shadow border border-border-light hover:border-primary/30" data-points="5000">
+              <p class="redeem-label font-display font-bold text-lg text-primary">$50</p>
+              <p class="redeem-pts text-xs text-on-surface-variant font-medium">5,000 pts</p>
+            </button>
+            <button class="redeem-amount-btn bg-white rounded-xl p-3 text-center hover:shadow-md transition-shadow border border-border-light hover:border-primary/30" data-points="10000">
+              <p class="redeem-label font-display font-bold text-lg text-primary">$100</p>
+              <p class="redeem-pts text-xs text-on-surface-variant font-medium">10,000 pts</p>
+            </button>
+          </div>
+          <button id="redeem-btn" class="mt-4 w-full h-12 bg-on-surface text-white rounded-xl font-semibold text-sm hover:bg-primary transition-colors flex items-center justify-center gap-2">
+            Redeem Now
+          </button>
+        </div>
+      </section>
+    </div>
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="fixed inset-0 z-[200] flex items-center justify-center px-4 hidden">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="lb-backdrop"></div>
+      <div class="relative bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+        <button id="lb-close" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="bg-surface-muted inline-block px-3 py-1 rounded-lg text-primary text-xs font-bold uppercase tracking-wider mb-4">Top Earners</div>
+        <h2 class="font-display text-2xl font-bold mb-6">Leaderboard</h2>
+        <div id="leaderboard-list" class="space-y-3">
+          <div class="flex items-center justify-center py-8 text-on-surface-variant">
+            <span class="material-symbols-outlined animate-spin mr-2">sync</span> Loading…
+          </div>
+        </div>
+        <div id="lb-my-rank" class="hidden mt-4 pt-4 border-t border-border-light text-center text-sm text-on-surface-variant font-semibold"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 pt-2 bg-surface shadow-lg rounded-t-xl md:hidden border-t border-border-light">
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/50 rounded-xl transition-all" href="dashboard.html">
+      <span class="material-symbols-outlined">home</span>
+      <span class="text-[11px] font-semibold">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/50 rounded-xl transition-all" href="shifts.html">
+      <span class="material-symbols-outlined">schedule</span>
+      <span class="text-[11px] font-semibold">Shifts</span>
+    </a>
+    <a class="flex flex-col items-center justify-center bg-secondary-container text-on-surface rounded-2xl px-4 py-1 active:scale-90 transition-all" href="referrals.html">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group_add</span>
+      <span class="text-[11px] font-semibold">Referrals</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/50 rounded-xl transition-all" href="profile.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[11px] font-semibold">Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    api.requireAuth();
+
+    let selectedRedeemPoints = 0;
+
+    // ── Load data ───────────────────────────────────────────────────────────
+    async function loadReferrals() {
+      try {
+        const data = await api.getReferrals();
+        const { referrals, stats } = data;
+
+        const totalEl = document.getElementById('total-points');
+        if (totalEl) totalEl.textContent = stats.totalPoints.toLocaleString();
+
+        const redeemEl = document.getElementById('redeemable-usd');
+        if (redeemEl) redeemEl.textContent = `$${stats.redeemableUsd.toFixed(2)}`;
+
+        const pct = Math.min(100, Math.round((stats.totalPoints / stats.nextTierPoints) * 100));
+        const barEl = document.getElementById('tier-progress-bar');
+        if (barEl) barEl.style.width = pct + '%';
+        const progressTextEl = document.getElementById('tier-progress-text');
+        if (progressTextEl) progressTextEl.textContent = `${stats.totalPoints.toLocaleString()} / ${stats.nextTierPoints.toLocaleString()} pts`;
+        const remainingEl = document.getElementById('tier-remaining-text');
+        if (remainingEl) {
+          const remaining = Math.max(0, stats.nextTierPoints - stats.totalPoints);
+          remainingEl.textContent = `${remaining.toLocaleString()} more points to unlock Platinum benefits`;
+        }
+
+        const codeEl = document.getElementById('referralCode');
+        if (codeEl && stats.referralCode) codeEl.value = stats.referralCode;
+
+        renderReferrals(referrals);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function getInitials(name) {
+      return name.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
+    }
+
+    function renderReferrals(referrals) {
+      const container = document.getElementById('referral-history');
+      if (!container) return;
+
+      if (referrals.length === 0) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center text-center py-8">
+            <div class="w-16 h-16 rounded-full bg-surface-muted flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">group_add</span>
+            </div>
+            <h4 class="font-display text-xl font-bold text-on-surface mb-2">No referrals yet</h4>
+            <p class="text-on-surface-variant text-sm max-w-md">Share your code and start earning 5,000 points per referral!</p>
+          </div>`;
+        return;
+      }
+
+      const cfgMap = {
+        pending:   { cls: 'bg-surface-container-highest text-on-secondary-fixed-variant', label: 'Pending', icon: false },
+        verified:  { cls: 'bg-blue-100 text-blue-700', label: 'Verified', icon: false },
+        completed: { cls: 'bg-primary/10 text-primary', label: 'Bonus Paid', icon: true },
+      };
+
+      const html = referrals.map(r => {
+        const cfg = cfgMap[r.status] || cfgMap.pending;
+        const initials = getInitials(r.refereeName);
+        const avatarBg = r.status === 'completed' ? 'bg-primary text-on-primary' : r.status === 'verified' ? 'bg-secondary-container text-primary' : 'bg-surface-muted text-primary';
+        const cardCls  = r.status === 'completed' ? 'bg-white border-2 border-primary/20 shadow-md' : 'bg-background border border-border-light hover:border-primary/30';
+        const badge = cfg.icon
+          ? `<span class="px-3 py-1 rounded-full ${cfg.cls} font-semibold text-[11px] uppercase flex items-center gap-1"><span class="material-symbols-outlined text-[13px]" style="font-variation-settings:'FILL' 1;">check_circle</span>${cfg.label}</span>`
+          : `<span class="px-3 py-1 rounded-full ${cfg.cls} font-semibold text-[11px] uppercase">${cfg.label}</span>`;
+        return `
+          <div class="flex items-center justify-between p-5 rounded-2xl ${cardCls} transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl ${avatarBg} flex items-center justify-center font-bold">${initials}</div>
+              <div>
+                <h3 class="font-semibold text-on-surface text-sm">${r.refereeName}</h3>
+                <p class="text-sm text-on-surface-variant">${fmtRelative(r.createdAt)}</p>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              ${badge}
+              <span class="text-primary font-bold text-sm">+${r.potentialPoints.toLocaleString()} pts</span>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = html + `
+        <div class="mt-6 pt-6 border-t border-border-light">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-full bg-surface-muted flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">celebration</span>
+            </div>
+            <h4 class="font-display text-xl font-bold text-on-surface mb-2">You're doing great!</h4>
+            <p class="text-on-surface-variant text-sm max-w-md leading-relaxed">Every referral strengthens our clinical community and puts rewards in your pocket. Keep sharing your code!</p>
+          </div>
+        </div>`;
+    }
+
+    // ── Referral form ───────────────────────────────────────────────────────
+    document.getElementById('referralForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      const name  = document.getElementById('ref-name').value.trim();
+      const email = document.getElementById('ref-email').value.trim();
+      const spec  = document.getElementById('ref-spec').value;
+
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="display:inline-block;animation:spin 1s linear infinite;">sync</span>&nbsp;Sending...';
+      btn.disabled = true;
+
+      try {
+        await api.submitReferral(name, email, spec && spec !== 'Select Specialization' ? spec : undefined);
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">check_circle</span>&nbsp;Invitation Sent!';
+        btn.classList.replace('bg-primary', 'bg-green-600');
+        showToast("Referral sent! You'll earn 5,000 points when they complete their first shift.");
+        this.reset();
+        loadReferrals();
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+          btn.classList.replace('bg-green-600', 'bg-primary');
+          btn.disabled = false;
+        }, 2500);
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+      }
+    });
+
+    // ── Copy referral code ──────────────────────────────────────────────────
+    document.getElementById('copyCodeBtn').addEventListener('click', function() {
+      const code = document.getElementById('referralCode').value;
+      navigator.clipboard.writeText(code).then(() => {
+        this.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>&nbsp;Copied!';
+        this.classList.add('text-green-600');
+        setTimeout(() => {
+          this.innerHTML = '<span class="material-symbols-outlined text-[16px]">content_copy</span>&nbsp;Copy';
+          this.classList.remove('text-green-600');
+        }, 2000);
+      });
+    });
+
+    // ── Redeem amount selection ─────────────────────────────────────────────
+    document.querySelectorAll('.redeem-amount-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.redeem-amount-btn').forEach(b => {
+          b.classList.remove('bg-primary', 'shadow-lg');
+          b.classList.add('bg-white');
+          const lbl = b.querySelector('.redeem-label');
+          const pts = b.querySelector('.redeem-pts');
+          if (lbl) { lbl.classList.remove('text-white'); lbl.classList.add('text-primary'); }
+          if (pts) { pts.classList.remove('text-white/70'); pts.classList.add('text-on-surface-variant'); }
+        });
+        this.classList.add('bg-primary', 'shadow-lg');
+        this.classList.remove('bg-white');
+        const lbl = this.querySelector('.redeem-label');
+        const pts = this.querySelector('.redeem-pts');
+        if (lbl) { lbl.classList.add('text-white'); lbl.classList.remove('text-primary'); }
+        if (pts) { pts.classList.add('text-white/70'); pts.classList.remove('text-on-surface-variant'); }
+        selectedRedeemPoints = parseInt(this.dataset.points);
+      });
+    });
+
+    document.getElementById('redeem-btn').addEventListener('click', async function() {
+      if (selectedRedeemPoints === 0) {
+        showToast('Please select a redemption amount first.', 'error');
+        return;
+      }
+      const originalContent = this.innerHTML;
+      this.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;" class="material-symbols-outlined">sync</span>&nbsp;Processing...';
+      this.disabled = true;
+      try {
+        const result = await api.redeemPoints(selectedRedeemPoints);
+        showToast(`Successfully redeemed $${result.cashValue.toFixed(2)}!`);
+        selectedRedeemPoints = 0;
+        document.querySelectorAll('.redeem-amount-btn').forEach(b => {
+          b.classList.remove('bg-primary', 'shadow-lg');
+          b.classList.add('bg-white');
+          const lbl = b.querySelector('.redeem-label');
+          const pts = b.querySelector('.redeem-pts');
+          if (lbl) { lbl.classList.remove('text-white'); lbl.classList.add('text-primary'); }
+          if (pts) { pts.classList.remove('text-white/70'); pts.classList.add('text-on-surface-variant'); }
+        });
+        loadReferrals();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+      this.innerHTML = originalContent;
+      this.disabled = false;
+    });
+
+    // ── Leaderboard Modal ───────────────────────────────────────────────────
+    const lbModal = document.getElementById('leaderboard-modal');
+
+    function closeLbModal() { lbModal.classList.add('hidden'); }
+    document.getElementById('lb-close').addEventListener('click', closeLbModal);
+    document.getElementById('lb-backdrop').addEventListener('click', closeLbModal);
+
+    document.getElementById('leaderboard-btn').addEventListener('click', async () => {
+      lbModal.classList.remove('hidden');
+      const listEl = document.getElementById('leaderboard-list');
+      const myRankEl = document.getElementById('lb-my-rank');
+      listEl.innerHTML = `<div class="flex items-center justify-center py-8 text-on-surface-variant"><span class="material-symbols-outlined mr-2" style="display:inline-block;animation:spin 1s linear infinite;">sync</span>Loading…</div>`;
+      myRankEl.classList.add('hidden');
+      try {
+        const data = await api.getLeaderboard();
+        const { leaderboard, myRank } = data;
+        const medals = ['🥇', '🥈', '🥉'];
+        listEl.innerHTML = leaderboard.map((u, i) => {
+          const medal = medals[i] || '';
+          const isMe = u.id === (api.getUser() || {}).id;
+          const rowCls = isMe ? 'bg-surface-muted border border-primary/30 shadow-sm' : 'bg-background border border-border-light';
+          return `
+            <div class="flex items-center gap-3 p-3 rounded-2xl ${rowCls}">
+              <div class="w-8 text-center font-bold text-sm ${i < 3 ? 'text-lg' : 'text-on-surface-variant'}">${medal || u.rank}</div>
+              <div class="flex-grow min-w-0">
+                <p class="font-semibold text-sm truncate${isMe ? ' text-primary' : ''}">${u.name}${isMe ? ' (You)' : ''}</p>
+                <p class="text-xs text-on-surface-variant">${u.specialization || 'Caregiver'}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-primary">${u.points.toLocaleString()} pts</p>
+                ${u.rating ? `<p class="text-xs text-on-surface-variant">${u.rating.toFixed(1)} ★</p>` : ''}
+              </div>
+            </div>`;
+        }).join('');
+        if (myRank) {
+          myRankEl.textContent = `Your rank: #${myRank}`;
+          myRankEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        listEl.innerHTML = `<p class="text-center text-error text-sm py-4">${err.message}</p>`;
+      }
+    });
+
+    loadReferrals();
+  </script>
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

@@ -1,0 +1,4 @@
+backend/
+node_modules/
+css/input.css
+tailwind.config.js

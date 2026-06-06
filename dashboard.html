@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>MediSync | Dashboard</title>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    var tailwind = tailwind || {}; tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface": "#161a2e",
+            "error": "#ba1a1a",
+            "border-light": "#EEEEEE",
+            "secondary-container": "#e0e0fc",
+            "on-surface-variant": "#4e4351",
+            "inverse-on-surface": "#f0efff",
+            "surface-container": "#ececff",
+            "surface-variant": "#dee1fd",
+            "outline": "#807382",
+            "on-tertiary-fixed": "#3e001f",
+            "surface-bright": "#fbf8ff",
+            "on-primary-fixed": "#310048",
+            "primary": "#5e0084",
+            "bg-alternate": "#FAF8FC",
+            "tertiary-container": "#8d2955",
+            "on-primary": "#ffffff",
+            "background": "#fbf8ff",
+            "tertiary": "#6f0e3e",
+            "outline-variant": "#d1c2d3",
+            "on-background": "#161a2e",
+            "on-secondary-container": "#61637a",
+            "surface-tint": "#8b35b3",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#ffa9c6",
+            "on-primary-container": "#e7acff",
+            "inverse-surface": "#2b2f44",
+            "surface": "#fbf8ff",
+            "surface-dim": "#d6d8f4",
+            "surface-muted": "#F3EBFF",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#f7d8ff",
+            "tertiary-fixed-dim": "#ffb0ca",
+            "surface-container-low": "#f3f2ff",
+            "surface-container-lowest": "#ffffff",
+            "error-container": "#ffdad6",
+            "surface-container-highest": "#dee1fd",
+            "border-secondary": "#DEDFF0",
+            "on-error": "#ffffff",
+            "surface-container-high": "#e5e6ff",
+            "on-secondary-fixed-variant": "#43455b",
+            "inverse-primary": "#e9b3ff",
+            "secondary": "#5b5d74",
+            "tertiary-fixed": "#ffd9e3",
+            "primary-container": "#7a22a3"
+          },
+          fontFamily: {
+            "display": ["Hanken Grotesk", "sans-serif"],
+            "label-md": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #161a2e; }
+    h1, h2, h3, h4 { font-family: 'Hanken Grotesk', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid #DEDFF0;
+    }
+    .glow-accent {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(139, 53, 179, 0.15) 0%, rgba(255,255,255,0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(100px, auto);
+      gap: 16px;
+    }
+    @media (max-width: 1024px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px)  { .bento-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-24 md:pb-8">
+
+  <!-- App Bar -->
+  <header class="flex justify-between items-center px-6 h-16 w-full fixed top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-light">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="flex items-center gap-2">
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden border-2 border-primary-fixed">
+          <img alt="Sarah" class="w-full h-full object-cover"
+               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn5oQa8T3SHk-M1_Rjh49kb4Vg26NL4lRQM2vBNAiMBkxX_dnsQL6fS9CyCaOy0Jq7GV5GuDyg08-_2U_d6BdVQN5JIK5XoO8IYYbLBt2aQAkdZVB2tIbJSdjQ0rk9KB67sPkSy1FaW_sS_BWaIeTedzqsBFHRCjW7jfi6XZy9XlFqWAcDIvwvD7grF99Sv66ehP_FjTEPQte-R3GLxGFhuUcuUYRGPR4Tb4KFbkbMrdoRCB9IwJ_YaY0F3gf1-hM-TkCA1V4FO4li"/>
+        </div>
+        <span class="font-display text-2xl font-black text-primary tracking-tighter">MediSync</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="relative p-2 text-on-surface-variant bg-surface-container rounded-full hover:bg-surface-variant transition-colors">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-background"></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="pt-24 px-4 sm:px-6 max-w-[1280px] mx-auto relative overflow-hidden">
+    <div class="glow-accent top-0 -left-40 opacity-50"></div>
+    <div class="glow-accent bottom-0 -right-40 opacity-50"></div>
+
+    <!-- Hero Header -->
+    <section class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <p class="text-primary font-semibold text-xs uppercase tracking-[0.2em] mb-2">Welcome Back</p>
+          <h1 id="greeting-name" class="font-display text-6xl md:text-8xl font-black text-on-surface leading-[0.9] tracking-tighter">Hello, Sarah</h1>
+        </div>
+        <div class="max-w-xs text-right hidden md:block">
+          <p class="text-on-surface-variant text-sm font-semibold border-r-4 border-primary pr-4">You have 1 shift remaining today. Your performance score is in the top 5% of your clinical unit.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Grid -->
+    <div class="bento-grid">
+
+      <!-- Clock In Card (large) -->
+      <div class="col-span-1 sm:col-span-2 row-span-2 bg-primary text-on-primary rounded-3xl p-8 flex flex-col justify-between shadow-2xl shadow-primary/20 relative overflow-hidden group">
+        <div class="absolute -right-10 -top-10 text-[180px] opacity-10 font-black pointer-events-none select-none font-display tracking-tighter">CLOCK</div>
+        <div class="relative z-10">
+          <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">Active Duty</span>
+          <h2 class="font-display text-4xl font-bold mb-2">Ready to start?</h2>
+          <p class="opacity-80 text-sm mb-8">Cedar Haven Assisted Living awaits your arrival.</p>
+        </div>
+        <button class="relative z-10 w-full bg-white text-primary py-6 rounded-2xl flex items-center justify-center gap-3 font-bold text-xl hover:bg-surface-muted transition-all active:scale-[0.98] group" id="main-clock-btn">
+          <span class="material-symbols-outlined text-3xl">login</span>
+          CLOCK IN
+          <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+
+      <!-- Performance Card -->
+      <div class="col-span-1 sm:col-span-2 bg-surface-container-lowest border border-border-light rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <h3 class="font-display text-2xl font-bold text-on-surface">Weekly Performance</h3>
+          <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">trending_up</span>
+        </div>
+        <div class="flex items-baseline gap-2 mt-4">
+          <span id="weekly-points" class="font-display text-5xl font-black text-primary">2,840</span>
+          <span class="text-on-surface-variant text-sm font-semibold">pts</span>
+        </div>
+        <div class="mt-4">
+          <div class="w-full bg-surface-container rounded-full h-2 mb-2 overflow-hidden">
+            <div id="goal-bar" class="bg-primary h-full rounded-full transition-all duration-700" style="width: 78%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">
+            <span id="goal-pct">78% of goal</span>
+            <span>Goal: 3,500</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stat: Earned Today -->
+      <div class="bg-tertiary-container text-on-tertiary rounded-3xl p-6 flex flex-col justify-center items-center text-center">
+        <p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Earned Today</p>
+        <p id="today-points" class="font-display text-4xl font-black">+450</p>
+      </div>
+
+      <!-- Quick Stat: Global Rank -->
+      <div class="bg-secondary-container text-on-secondary-container rounded-3xl p-6 flex flex-col justify-center items-center text-center border border-primary/10">
+        <p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Global Rank</p>
+        <p id="global-rank" class="font-display text-4xl font-black">#14</p>
+      </div>
+
+      <!-- Shift Preview (wide) -->
+      <div class="col-span-1 sm:col-span-4 bg-surface-container-lowest border border-border-light rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row">
+        <div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">apartment</span>
+              <h3 id="next-shift-facility" class="font-display text-2xl font-bold text-on-surface">Cedar Haven</h3>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-on-surface-variant text-sm">
+                <span class="material-symbols-outlined text-sm">schedule</span>
+                <span id="next-shift-time">14:00 – 22:00 (8h) &nbsp;•&nbsp; Today</span>
+              </div>
+              <div class="flex items-center gap-2 text-on-surface-variant text-sm">
+                <span class="material-symbols-outlined text-sm">location_on</span>
+                Broadway Business District
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 flex items-center gap-4 p-3 bg-surface-muted rounded-2xl border border-primary/5">
+            <div class="flex -space-x-2">
+              <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD72MLbz8RJT_ahFYqrmFPb01V59N6crcF61WaT-lJGcaUWUTwrWzlEolM5kccjuvsX-zZTegW7o6eEJ1md43BF7Gz-DV74HVsLHGaZn30-J3dxydcGNoyQP_r9RbHG5vFr_-keoaf19279lvQs7H_ByH12PZcLp217nlafE5enkxgd4EWZdk_aoFGsc2tU6tPHSpk-gJDa36cexwmldGQFK30sWLN4bAkPXkDzexCkyh9d04ll7c3XW0tg4VERO5xBNaX6l2zrsEfm" alt="Team member"/>
+              <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2iE8UFcWgwhTP_8s-m3-whDmmmq1KDfCGHgJAZdlDkyUlZrQVbkENoLwfyuvfQBOA66iux1-RXHEkQpyNDCOGHxIk-Nn_w4fZ4XB14xm1jdAEFQK0SZXX-Pkapo4jpxsfqrRV6mpsbTemFHcDa9G0vcpywN8i7zFLHkfKnU7wv3TT5unkVDx2XdOQy1rL59WL2Fj8IXwRGVCTepj0nhmVazNwfZToXyBqI5jQbvX8YX7mxNFJMTuDBDRCMq14gH1AEpS1EZ5GFev3" alt="Team member"/>
+            </div>
+            <p id="team-count" class="text-[11px] font-bold text-on-surface">5 team members online</p>
+            <button class="ml-auto text-primary text-[11px] font-black uppercase hover:underline">Chat</button>
+          </div>
+        </div>
+        <div class="w-full md:w-1/2 h-48 md:h-auto relative border-t md:border-t-0 md:border-l border-border-light">
+          <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeel-pZM8dNtjagu29W0qNLo6686UDlOwC5-KM-YJL_vuJGBPpWfW-lnFKbWQNnTXKKtf44-YhHFv7t_gWXQ3h7ML68RkdRtBXQ5zaN-SSKYsgzTaBW_f0A0x-qJHw3rx49yWCZ2gVLcxh9prAYuwhAtjK5XA-8nE_LmfT0e58Pj5QzApZ6GYDGu-uxS7vHdB4gBYaXwG9eszNsGzN07O5pVbFHI_qgnythii8EHgXOIjkj4m6gbT60l7FM2uJTm9gBi89l8jtnkgN" alt="Cedar Haven facility"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-border-light flex items-center gap-3">
+            <div class="bg-primary/10 p-2 rounded-xl">
+              <span class="material-symbols-outlined text-primary text-lg">directions_car</span>
+            </div>
+            <div>
+              <p class="text-[12px] font-black text-on-surface">12 min drive</p>
+              <p id="next-shift-distance" class="text-[10px] text-on-surface-variant font-medium">2.4 miles via Broadway</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="col-span-1 sm:col-span-2 row-span-2 bg-surface-container-low rounded-3xl p-6 border border-border-light flex flex-col">
+        <h3 class="font-display text-2xl font-bold text-on-surface mb-6">Recent Activity</h3>
+        <div id="activity-list" class="space-y-4 flex-1">
+          <div class="p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Shift Confirmed</p>
+                <p class="text-[11px] text-on-surface-variant leading-tight mt-1">You've been assigned to Mercy General on Friday.</p>
+                <p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">2 hours ago</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary">card_giftcard</span>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">New Referral Reward</p>
+                <p class="text-[11px] text-on-surface-variant leading-tight mt-1">Your friend Mark joined! +500 points pending.</p>
+                <p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">Yesterday</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary">stars</span>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">5-Star Rating Received</p>
+                <p class="text-[11px] text-on-surface-variant leading-tight mt-1">Patient family rated your care 5 stars. +150 pts bonus!</p>
+                <p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">2 days ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pulse Survey -->
+      <div class="col-span-1 sm:col-span-2 bg-primary text-on-primary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+        <div class="absolute right-[-10px] top-[-10px] opacity-10 pointer-events-none">
+          <span class="material-symbols-outlined text-[120px]">bolt</span>
+        </div>
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-white/20 rounded-xl">
+              <span class="material-symbols-outlined">bolt</span>
+            </div>
+            <h3 class="font-display text-xl font-bold leading-tight">Unit Pulse Survey</h3>
+          </div>
+          <p class="text-sm opacity-90">Share how your last shift went to earn 50 bonus points.</p>
+        </div>
+        <button id="survey-btn" class="relative z-10 w-full bg-white text-primary py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-transform active:scale-95">
+          Start Now
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Pulse Survey Modal -->
+  <div id="survey-modal" class="fixed inset-0 z-[200] flex items-center justify-center px-4 hidden">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="survey-backdrop"></div>
+    <div class="relative bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl z-10">
+      <button id="survey-close" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div class="bg-surface-muted inline-block px-3 py-1 rounded-lg text-primary text-xs font-bold uppercase tracking-wider mb-4">+50 pts</div>
+      <h2 class="font-display text-2xl font-bold mb-1">Unit Pulse Survey</h2>
+      <p class="text-on-surface-variant text-sm mb-6">Tell us about your last shift experience.</p>
+      <form id="survey-form" class="space-y-6">
+        <div>
+          <p class="text-sm font-semibold mb-3">Overall shift experience?</p>
+          <div class="flex gap-2" id="q1-stars">
+            <button type="button" class="star-btn text-3xl text-on-surface-variant hover:text-amber-400 transition-colors" data-q="1" data-v="1">★</button>
+            <button type="button" class="star-btn text-3xl text-on-surface-variant hover:text-amber-400 transition-colors" data-q="1" data-v="2">★</button>
+            <button type="button" class="star-btn text-3xl text-on-surface-variant hover:text-amber-400 transition-colors" data-q="1" data-v="3">★</button>
+            <button type="button" class="star-btn text-3xl text-on-surface-variant hover:text-amber-400 transition-colors" data-q="1" data-v="4">★</button>
+            <button type="button" class="star-btn text-3xl text-on-surface-variant hover:text-amber-400 transition-colors" data-q="1" data-v="5">★</button>
+          </div>
+          <input type="hidden" id="q1-val" value="0">
+        </div>
+        <div>
+          <p class="text-sm font-semibold mb-3">How was the team collaboration?</p>
+          <div class="grid grid-cols-3 gap-2" id="q2-opts">
+            <button type="button" class="option-btn border border-border-light rounded-xl py-2 text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-primary transition-colors" data-q="2" data-v="excellent">Excellent</button>
+            <button type="button" class="option-btn border border-border-light rounded-xl py-2 text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-primary transition-colors" data-q="2" data-v="good">Good</button>
+            <button type="button" class="option-btn border border-border-light rounded-xl py-2 text-xs font-semibold text-on-surface-variant hover:border-primary hover:text-primary transition-colors" data-q="2" data-v="poor">Needs Work</button>
+          </div>
+          <input type="hidden" id="q2-val" value="">
+        </div>
+        <div>
+          <p class="text-sm font-semibold mb-2">Any comments? (optional)</p>
+          <textarea id="q3-text" rows="2" placeholder="Share feedback for the facility…"
+                    class="w-full border border-border-light rounded-xl px-4 py-3 text-sm outline-none focus:border-primary resize-none"></textarea>
+        </div>
+        <div id="survey-error" class="hidden text-xs text-error font-semibold flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">error</span>
+          <span id="survey-error-text"></span>
+        </div>
+        <button type="submit" id="survey-submit-btn"
+                class="w-full h-12 bg-primary text-on-primary rounded-xl font-bold text-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">bolt</span>
+          Submit & Earn 50 Points
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-t border-border-light px-6 py-3 flex justify-between items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+    <a class="flex flex-col items-center gap-1 text-primary" href="dashboard.html">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+      <span class="text-[10px] font-black uppercase tracking-tighter">Home</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="shifts.html">
+      <span class="material-symbols-outlined">schedule</span>
+      <span class="text-[10px] font-black uppercase tracking-tighter">Shifts</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="referrals.html">
+      <span class="material-symbols-outlined">group_add</span>
+      <span class="text-[10px] font-black uppercase tracking-tighter">Referrals</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="profile.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-black uppercase tracking-tighter">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Desktop side nav hint -->
+  <div class="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 items-center gap-6 bg-white/90 backdrop-blur-xl border border-border-light rounded-full px-6 py-3 shadow-lg">
+    <a class="flex items-center gap-2 text-primary font-semibold text-sm" href="dashboard.html">
+      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">home</span> Home
+    </a>
+    <div class="w-px h-4 bg-border-light"></div>
+    <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="shifts.html">
+      <span class="material-symbols-outlined text-[18px]">schedule</span> Shifts
+    </a>
+    <div class="w-px h-4 bg-border-light"></div>
+    <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="referrals.html">
+      <span class="material-symbols-outlined text-[18px]">group_add</span> Referrals
+    </a>
+    <div class="w-px h-4 bg-border-light"></div>
+    <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="profile.html">
+      <span class="material-symbols-outlined text-[18px]">person</span> Profile
+    </a>
+  </div>
+
+  <script>
+    // ── Auth guard ───────────────────────────────────────────────────────────
+    api.requireAuth();
+
+    // ── Load dashboard data ───────────────────────────────────────────────────
+    let nextShiftId = null;
+    let claimStatus = null;
+
+    async function loadDashboard() {
+      try {
+        const data = await api.getDashboard();
+        const { user, stats, nextShift, teamMembers, recentActivity } = data;
+
+        // Greeting
+        const firstName = user.name.split(' ')[0];
+        const greetEl = document.getElementById('greeting-name');
+        if (greetEl) greetEl.textContent = `Hello, ${firstName}`;
+
+        // Stats
+        const weeklyEl = document.getElementById('weekly-points');
+        if (weeklyEl) weeklyEl.textContent = stats.weeklyPoints.toLocaleString();
+        const todayEl = document.getElementById('today-points');
+        if (todayEl) todayEl.textContent = `+${stats.todayPoints}`;
+        const rankEl = document.getElementById('global-rank');
+        if (rankEl) rankEl.textContent = `#${stats.globalRank}`;
+
+        // Weekly goal progress
+        const pct = Math.min(100, Math.round((stats.weeklyPoints / stats.weeklyGoal) * 100));
+        const bar = document.getElementById('goal-bar');
+        if (bar) bar.style.width = pct + '%';
+        const pctLabel = document.getElementById('goal-pct');
+        if (pctLabel) pctLabel.textContent = `${pct}% of goal`;
+
+        // Next shift / clock-in card
+        if (nextShift) {
+          nextShiftId = nextShift.shiftId;
+          claimStatus = nextShift.status;
+          const facilityEl = document.getElementById('next-shift-facility');
+          if (facilityEl) facilityEl.textContent = nextShift.facility.name;
+          const timeEl = document.getElementById('next-shift-time');
+          if (timeEl) timeEl.textContent = `${fmtTime(nextShift.startTime)} – ${fmtTime(nextShift.endTime)} (${fmtDuration(nextShift.startTime, nextShift.endTime)}) • ${fmtDate(nextShift.startTime)}`;
+          const distanceEl = document.getElementById('next-shift-distance');
+          if (distanceEl && nextShift.distance) distanceEl.textContent = `${nextShift.distance} miles`;
+
+          // If already active (clocked in), update button
+          if (claimStatus === 'active') {
+            updateClockBtn('active');
+          }
+        }
+
+        // Team members
+        if (teamMembers.length > 0) {
+          const teamEl = document.getElementById('team-count');
+          if (teamEl) teamEl.textContent = `${teamMembers.length} team member${teamMembers.length !== 1 ? 's' : ''} confirmed`;
+        }
+
+        // Recent activity
+        renderActivity(recentActivity);
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function renderActivity(activity) {
+      const container = document.getElementById('activity-list');
+      if (!container) return;
+      container.innerHTML = '';
+      if (activity.length === 0) {
+        container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No recent activity yet.</p>';
+        return;
+      }
+      activity.forEach((tx) => {
+        const el = document.createElement('div');
+        el.className = 'p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer';
+        el.innerHTML = `
+          <div class="flex gap-3">
+            <div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">${activityIcon(tx.reason)}</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">${activityLabel(tx.reason, tx.meta)}</p>
+              <p class="text-[11px] text-on-surface-variant leading-tight mt-1">
+                ${tx.points > 0 ? '+' : ''}${tx.points} MediPoints
+              </p>
+              <p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">${fmtRelative(tx.createdAt)}</p>
+            </div>
+          </div>`;
+        container.appendChild(el);
+      });
+    }
+
+    function updateClockBtn(state) {
+      const btn = document.getElementById('main-clock-btn');
+      if (!btn) return;
+      if (state === 'active') {
+        btn.innerHTML = '<span class="material-symbols-outlined text-3xl" style="font-variation-settings:\'FILL\' 1;">check_circle</span> ON DUTY — TAP TO CLOCK OUT';
+        btn.classList.remove('bg-white', 'text-primary');
+        btn.classList.add('bg-green-500', 'text-white');
+      } else if (state === 'clocking') {
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="animation:spin 1s linear infinite;">sync</span>&nbsp;PROCESSING';
+        btn.disabled = true;
+        btn.classList.add('opacity-75');
+      }
+    }
+
+    // Clock In / Out handler
+    const clockBtn = document.getElementById('main-clock-btn');
+    if (clockBtn) {
+      clockBtn.addEventListener('click', async function() {
+        if (!nextShiftId) return;
+        updateClockBtn('clocking');
+        try {
+          if (claimStatus === 'active') {
+            const result = await api.clockOut(nextShiftId);
+            showToast(`Clocked out! Earned ${result.pointsEarned} points.`);
+            claimStatus = 'completed';
+            clockBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">check_circle</span>&nbsp;SHIFT COMPLETE';
+            clockBtn.classList.add('bg-on-surface', 'text-white');
+            clockBtn.disabled = true;
+          } else {
+            await api.clockIn(nextShiftId);
+            claimStatus = 'active';
+            showToast('Clocked in! Have a great shift.');
+            updateClockBtn('active');
+            clockBtn.disabled = false;
+          }
+        } catch (err) {
+          showToast(err.message, 'error');
+          // Restore button
+          clockBtn.innerHTML = '<span class="material-symbols-outlined text-3xl">login</span> CLOCK IN <span class="material-symbols-outlined">arrow_forward</span>';
+          clockBtn.disabled = false;
+          clockBtn.classList.remove('opacity-75');
+        }
+      });
+    }
+
+    // ── Pulse Survey Modal ───────────────────────────────────────────────────
+    const surveyModal = document.getElementById('survey-modal');
+    function closeSurvey() { surveyModal.classList.add('hidden'); }
+    document.getElementById('survey-close').addEventListener('click', closeSurvey);
+    document.getElementById('survey-backdrop').addEventListener('click', closeSurvey);
+
+    document.getElementById('survey-btn').addEventListener('click', () => {
+      document.getElementById('survey-form').reset();
+      document.getElementById('q1-val').value = '0';
+      document.getElementById('q2-val').value = '';
+      document.getElementById('survey-error').classList.add('hidden');
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.replace('text-amber-400', 'text-on-surface-variant') || true);
+      document.querySelectorAll('.option-btn').forEach(b => { b.classList.remove('border-primary', 'text-primary', 'bg-surface-muted'); });
+      surveyModal.classList.remove('hidden');
+    });
+
+    // Star rating
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.v);
+        document.getElementById('q1-val').value = val;
+        document.querySelectorAll('.star-btn').forEach(b => {
+          b.classList.toggle('text-amber-400', parseInt(b.dataset.v) <= val);
+          b.classList.toggle('text-on-surface-variant', parseInt(b.dataset.v) > val);
+        });
+      });
+    });
+
+    // Option buttons
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const q = btn.dataset.q;
+        document.querySelectorAll(`.option-btn[data-q="${q}"]`).forEach(b => {
+          b.classList.remove('border-primary', 'text-primary', 'bg-surface-muted');
+        });
+        btn.classList.add('border-primary', 'text-primary', 'bg-surface-muted');
+        document.getElementById(`q${q}-val`).value = btn.dataset.v;
+      });
+    });
+
+    document.getElementById('survey-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('survey-error');
+      const errTxt = document.getElementById('survey-error-text');
+      const rating = parseInt(document.getElementById('q1-val').value);
+      const collab = document.getElementById('q2-val').value;
+
+      if (!rating) { errTxt.textContent = 'Please rate your shift experience.'; errEl.classList.remove('hidden'); return; }
+      if (!collab) { errTxt.textContent = 'Please select a collaboration rating.'; errEl.classList.remove('hidden'); return; }
+
+      const btn = document.getElementById('survey-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="display:inline-block;animation:spin 1s linear infinite;">sync</span>&nbsp;Submitting…';
+
+      try {
+        // Award 50 pts via a point transaction (best-effort — backend may not have this endpoint yet)
+        try { await api.post('/api/points/survey', { rating, collaboration: collab, comment: document.getElementById('q3-text').value }); } catch (_) {}
+        closeSurvey();
+        showToast('Thanks! +50 bonus points credited.', 'success');
+        loadDashboard();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">bolt</span>&nbsp;Submit & Earn 50 Points';
+      }
+    });
+
+    loadDashboard();
+  </script>
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

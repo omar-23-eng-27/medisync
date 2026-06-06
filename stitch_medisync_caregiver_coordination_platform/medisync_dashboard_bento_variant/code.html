@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediSync Dashboard | Radical Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid #DEDFF0;
+        }
+        .glow-accent {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 53, 179, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+            gap: 16px;
+        }
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .serif-heading {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#161a2e",
+                        "error": "#ba1a1a",
+                        "border-light": "#EEEEEE",
+                        "secondary-container": "#e0e0fc",
+                        "on-surface-variant": "#4e4351",
+                        "inverse-on-surface": "#f0efff",
+                        "surface-container": "#ececff",
+                        "surface-variant": "#dee1fd",
+                        "outline": "#807382",
+                        "secondary-fixed": "#e0e0fc",
+                        "on-tertiary-fixed": "#3e001f",
+                        "surface-bright": "#fbf8ff",
+                        "on-primary-fixed": "#310048",
+                        "primary": "#5e0084",
+                        "on-secondary-fixed": "#181a2e",
+                        "secondary-fixed-dim": "#c3c4df",
+                        "bg-alternate": "#FAF8FC",
+                        "tertiary-container": "#8d2955",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf8ff",
+                        "tertiary": "#6f0e3e",
+                        "outline-variant": "#d1c2d3",
+                        "primary-fixed-dim": "#e9b3ff",
+                        "on-background": "#161a2e",
+                        "on-secondary-container": "#61637a",
+                        "surface-tint": "#8b35b3",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#821f4c",
+                        "on-primary-fixed-variant": "#701499",
+                        "on-primary-container": "#e7acff",
+                        "inverse-surface": "#2b2f44",
+                        "surface": "#fbf8ff",
+                        "surface-dim": "#d6d8f4",
+                        "surface-muted": "#F3EBFF",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#f7d8ff",
+                        "tertiary-fixed-dim": "#ffb0ca",
+                        "surface-container-low": "#f3f2ff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dee1fd",
+                        "border-secondary": "#DEDFF0",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e5e6ff",
+                        "on-tertiary-container": "#ffa9c6",
+                        "on-secondary-fixed-variant": "#43455b",
+                        "inverse-primary": "#e9b3ff",
+                        "secondary": "#5b5d74",
+                        "tertiary-fixed": "#ffd9e3",
+                        "primary-container": "#7a22a3"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "section-padding-lg": "120px",
+                        "unit": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "section-padding-sm": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Playfair Display"],
+                        "headline-md": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Playfair Display"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24 md:pb-8">
+<!-- App Bar -->
+<header class="flex justify-between items-center px-6 h-16 w-full fixed top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-light">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden border-2 border-primary-fixed">
+<img alt="Sarah" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn5oQa8T3SHk-M1_Rjh49kb4Vg26NL4lRQM2vBNAiMBkxX_dnsQL6fS9CyCaOy0Jq7GV5GuDyg08-_2U_d6BdVQN5JIK5XoO8IYYbLBt2aQAkdZVB2tIbJSdjQ0rk9KB67sPkSy1FaW_sS_BWaIeTedzqsBFHRCjW7jfi6XZy9XlFqWAcDIvwvD7grF99Sv66ehP_FjTEPQte-R3GLxGFhuUcuUYRGPR4Tb4KFbkbMrdoRCB9IwJ_YaY0F3gf1-hM-TkCA1V4FO4li"/>
+</div>
+<span class="serif-heading text-2xl font-black text-primary tracking-tighter">MediSync</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-on-surface-variant bg-surface-container rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-background"></span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-4 sm:px-6 max-w-container-max mx-auto relative overflow-hidden">
+<div class="glow-accent top-0 -left-40 opacity-50"></div>
+<div class="glow-accent bottom-0 -right-40 opacity-50"></div>
+<!-- Hero Header -->
+<section class="mb-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<p class="text-primary font-label-md uppercase tracking-[0.2em] mb-2 font-bold">Welcome Back</p>
+<h1 class="serif-heading text-6xl md:text-8xl font-black text-on-surface leading-[0.9] tracking-tighter">Hello, Sarah</h1>
+</div>
+<div class="max-w-xs text-right hidden md:block">
+<p class="text-on-surface-variant text-sm font-semibold border-r-4 border-primary pr-4">You have 1 shift remaining today. Your performance score is in the top 5% of your clinical unit.</p>
+</div>
+</div>
+</section>
+<!-- Radical Bento Grid -->
+<div class="bento-grid">
+<!-- LARGE PROMINENT CLOCK IN CARD -->
+<div class="col-span-1 sm:col-span-2 row-span-2 bg-primary text-on-primary rounded-3xl p-8 flex flex-col justify-between shadow-2xl shadow-primary/20 relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 text-[180px] opacity-10 font-black pointer-events-none select-none serif-heading">CLOCK</div>
+<div class="relative z-10">
+<span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">Active Duty</span>
+<h2 class="serif-heading text-4xl font-bold mb-2">Ready to start?</h2>
+<p class="opacity-80 text-sm mb-8">Cedar Haven Assisted Living awaits your arrival.</p>
+</div>
+<button class="relative z-10 w-full bg-white text-primary py-6 rounded-2xl flex items-center justify-center gap-3 font-bold text-xl hover:bg-secondary-container transition-all active:scale-[0.98] group" id="main-clock-btn">
+<span class="material-symbols-outlined text-3xl" data-icon="login">login</span>
+                CLOCK IN
+                <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- PERFORMANCE CARD -->
+<div class="col-span-1 sm:col-span-2 bg-surface-container-lowest border border-border-light rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<h3 class="serif-heading text-2xl font-bold text-on-surface">Weekly Performance</h3>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg" data-icon="trending_up">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2 mt-4">
+<span class="serif-heading text-5xl font-black text-primary">2,840</span>
+<span class="font-label-md text-on-surface-variant">pts</span>
+</div>
+<div class="mt-4">
+<div class="w-full bg-surface-container rounded-full h-2 mb-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 78%"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">
+<span>78% of goal</span>
+<span>Goal: 3,500</span>
+</div>
+</div>
+</div>
+<!-- QUICK STAT 1 -->
+<div class="bg-tertiary-container text-on-tertiary-container rounded-3xl p-6 flex flex-col justify-center items-center text-center">
+<p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Earned Today</p>
+<p class="serif-heading text-4xl font-black">+450</p>
+</div>
+<!-- QUICK STAT 2 -->
+<div class="bg-secondary-container text-on-secondary-container rounded-3xl p-6 flex flex-col justify-center items-center text-center border border-primary/10">
+<p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Global Rank</p>
+<p class="serif-heading text-4xl font-black">#14</p>
+</div>
+<!-- MAP / SHIFT PREVIEW (Wide) -->
+<div class="col-span-1 sm:col-span-4 bg-surface-container-lowest border border-border-light rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row">
+<div class="w-full md:w-1/2 p-6 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="apartment">apartment</span>
+<h3 class="serif-heading text-2xl font-bold text-on-surface">Cedar Haven</h3>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                            14:00 - 22:00 (8h) • Today
+                        </div>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+                            Broadway Business District
+                        </div>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-4 p-3 bg-surface-muted rounded-2xl border border-primary/5">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD72MLbz8RJT_ahFYqrmFPb01V59N6crcF61WaT-lJGcaUWUTwrWzlEolM5kccjuvsX-zZTegW7o6eEJ1md43BF7Gz-DV74HVsLHGaZn30-J3dxydcGNoyQP_r9RbHG5vFr_-keoaf19279lvQs7H_ByH12PZcLp217nlafE5enkxgd4EWZdk_aoFGsc2tU6tPHSpk-gJDa36cexwmldGQFK30sWLN4bAkPXkDzexCkyh9d04ll7c3XW0tg4VERO5xBNaX6l2zrsEfm"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2iE8UFcWgwhTP_8s-m3-whDmmmq1KDfCGHgJAZdlDkyUlZrQVbkENoLwfyuvfQBOA66iux1-RXHEkQpyNDCOGHxIk-Nn_w4fZ4XB14xm1jdAEFQK0SZXX-Pkapo4jpxsfqrRV6mpsbTemFHcDa9G0vcpywN8i7zFLHkfKnU7wv3TT5unkVDx2XdOQy1rL59WL2Fj8IXwRGVCTepj0nhmVazNwfZToXyBqI5jQbvX8YX7mxNFJMTuDBDRCMq14gH1AEpS1EZ5GFev3"/>
+</div>
+<p class="text-[11px] font-bold text-on-surface">5 team members online</p>
+<button class="ml-auto text-primary text-[11px] font-black uppercase hover:underline">Chat</button>
+</div>
+</div>
+<div class="w-full md:w-1/2 h-48 md:h-auto relative border-t md:border-t-0 md:border-l border-border-light">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeel-pZM8dNtjagu29W0qNLo6686UDlOwC5-KM-YJL_vuJGBPpWfW-lnFKbWQNnTXKKtf44-YhHFv7t_gWXQ3h7ML68RkdRtBXQ5zaN-SSKYsgzTaBW_f0A0x-qJHw3rx49yWCZ2gVLcxh9prAYuwhAtjK5XA-8nE_LmfT0e58Pj5QzApZ6GYDGu-uxS7vHdB4gBYaXwG9eszNsGzN07O5pVbFHI_qgnythii8EHgXOIjkj4m6gbT60l7FM2uJTm9gBi89l8jtnkgN"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-border-light flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-xl">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="directions_car">directions_car</span>
+</div>
+<div>
+<p class="text-[12px] font-black text-on-surface">12 min drive</p>
+<p class="text-[10px] text-on-surface-variant font-medium">2.4 miles via Broadway</p>
+</div>
+</div>
+</div>
+</div>
+<!-- RECENT ACTIVITY (Tall Column-like Card) -->
+<div class="col-span-1 sm:col-span-2 row-span-2 bg-surface-container-low rounded-3xl p-6 border border-border-light flex flex-col">
+<h3 class="serif-heading text-2xl font-bold text-on-surface mb-6">Recent Activity</h3>
+<div class="space-y-4 flex-1">
+<div class="p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">Shift Confirmed</p>
+<p class="text-[11px] text-on-surface-variant leading-tight mt-1">You've been assigned to Mercy General on Friday.</p>
+<p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">2 hours ago</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-white rounded-2xl border border-border-light hover:shadow-md transition-shadow group cursor-pointer">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="card_giftcard">card_giftcard</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">New Referral Reward</p>
+<p class="text-[11px] text-on-surface-variant leading-tight mt-1">Your friend Mark joined! +500 points pending.</p>
+<p class="text-[10px] font-bold text-primary/50 mt-2 uppercase">Yesterday</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- PULSE SURVEY (Energy Card) -->
+<div class="col-span-1 sm:col-span-2 bg-primary text-on-primary rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+<div class="absolute right-[-10px] top-[-10px] opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="bolt">bolt</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="p-2 bg-white/20 rounded-xl">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</div>
+<h3 class="serif-heading text-xl font-bold leading-tight">Unit Pulse Survey</h3>
+</div>
+<p class="text-sm opacity-90">Share how your last shift went to earn 50 bonus points.</p>
+</div>
+<button class="relative z-10 w-full bg-white text-primary py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-transform">Start Now</button>
+</div>
+</div>
+</main>
+<!-- Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-t border-border-light px-6 py-3 flex justify-between items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-variation-fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-black uppercase tracking-tighter">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">schedule</span>
+<span class="text-[10px] font-black uppercase tracking-tighter">Shifts</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">group_add</span>
+<span class="text-[10px] font-black uppercase tracking-tighter">Referrals</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-60 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-black uppercase tracking-tighter">Profile</span>
+</a>
+</nav>
+<script>
+    const clockBtn = document.getElementById('main-clock-btn');
+    if(clockBtn) {
+        clockBtn.addEventListener('click', function() {
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span> PROCESSING';
+            this.classList.add('opacity-80');
+            
+            setTimeout(() => {
+                this.innerHTML = '<span class="material-symbols-outlined" data-icon="check">check</span> ON DUTY';
+                this.classList.remove('bg-white', 'text-primary', 'opacity-80');
+                this.classList.add('bg-tertiary-container', 'text-white');
+                
+                // Update the small card indicator if it existed
+                const badge = this.parentElement.querySelector('.bg-white\\/20');
+                if(badge) { badge.textContent = 'Shift Active'; badge.classList.add('bg-green-500'); }
+            }, 1500);
+        });
+    }
+</script>
+</body></html>
