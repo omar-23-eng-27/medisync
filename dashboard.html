@@ -156,8 +156,8 @@
         <div class="absolute -right-10 -top-10 text-[180px] opacity-10 font-black pointer-events-none select-none font-display tracking-tighter">CLOCK</div>
         <div class="relative z-10">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">Active Duty</span>
-          <h2 class="font-display text-4xl font-bold mb-2">Ready to start?</h2>
-          <p class="opacity-80 text-sm mb-8">Cedar Haven Assisted Living awaits your arrival.</p>
+          <h2 id="clock-card-heading" class="font-display text-4xl font-bold mb-2">Ready to start?</h2>
+          <p id="clock-card-subtitle" class="opacity-80 text-sm mb-8">Loading your next shift…</p>
         </div>
         <button class="relative z-10 w-full bg-white text-primary py-6 rounded-2xl flex items-center justify-center gap-3 font-bold text-xl hover:bg-surface-muted transition-all active:scale-[0.98] group" id="main-clock-btn">
           <span class="material-symbols-outlined text-3xl">login</span>
@@ -476,10 +476,25 @@
           const distanceEl = document.getElementById('next-shift-distance');
           if (distanceEl && nextShift.distance) distanceEl.textContent = `${nextShift.distance} miles`;
 
-          // If already active (clocked in), update button
-          if (claimStatus === 'active') {
+          // Update clock card text
+          const subtitle = document.getElementById('clock-card-subtitle');
+          if (subtitle) subtitle.textContent = `${nextShift.facility.name} awaits your arrival.`;
+          if (claimStatus === 'claimed') {
+            const heading = document.getElementById('clock-card-heading');
+            if (heading) heading.textContent = 'Pending approval';
+            if (subtitle) subtitle.textContent = `Your application to ${nextShift.facility.name} is under review.`;
+            const btn = document.getElementById('main-clock-btn');
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span>&nbsp;AWAITING APPROVAL'; }
+          } else if (claimStatus === 'active') {
             updateClockBtn('active');
           }
+        } else {
+          const heading = document.getElementById('clock-card-heading');
+          const subtitle = document.getElementById('clock-card-subtitle');
+          if (heading) heading.textContent = 'No upcoming shifts';
+          if (subtitle) subtitle.textContent = 'Browse the marketplace to claim your next shift.';
+          const btn = document.getElementById('main-clock-btn');
+          if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.innerHTML = '<span class="material-symbols-outlined">search</span>&nbsp;BROWSE SHIFTS'; btn.onclick = () => window.location.href = 'shifts.html'; btn.disabled = false; btn.style.opacity = '1'; }
         }
 
         // Team members
@@ -528,13 +543,15 @@
       const btn = document.getElementById('main-clock-btn');
       if (!btn) return;
       if (state === 'active') {
-        btn.innerHTML = '<span class="material-symbols-outlined text-3xl" style="font-variation-settings:\'FILL\' 1;">check_circle</span> ON DUTY — TAP TO CLOCK OUT';
-        btn.classList.remove('bg-white', 'text-primary');
-        btn.classList.add('bg-green-500', 'text-white');
+        btn.innerHTML = '<span class="material-symbols-outlined text-3xl" style="font-variation-settings:\'FILL\' 1;">check_circle</span>&nbsp;ON DUTY — TAP TO CLOCK OUT';
+        btn.style.background = '#22c55e';
+        btn.style.color = '#fff';
+        btn.style.opacity = '1';
+        btn.disabled = false;
       } else if (state === 'clocking') {
-        btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="animation:spin 1s linear infinite;">sync</span>&nbsp;PROCESSING';
+        btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;display:inline-block;">sync</span>&nbsp;PROCESSING…';
         btn.disabled = true;
-        btn.classList.add('opacity-75');
+        btn.style.opacity = '0.75';
       }
     }
 
@@ -547,24 +564,26 @@
         try {
           if (claimStatus === 'active') {
             const result = await api.clockOut(nextShiftId);
-            showToast(`Clocked out! Earned ${result.pointsEarned} points.`);
+            showToast(`Clocked out! Earned ${result.pointsEarned} pts.`);
             claimStatus = 'completed';
             clockBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">check_circle</span>&nbsp;SHIFT COMPLETE';
-            clockBtn.classList.add('bg-on-surface', 'text-white');
+            clockBtn.style.background = '#161a2e';
+            clockBtn.style.color = '#fff';
+            clockBtn.style.opacity = '1';
             clockBtn.disabled = true;
           } else {
             await api.clockIn(nextShiftId);
             claimStatus = 'active';
             showToast('Clocked in! Have a great shift.');
             updateClockBtn('active');
-            clockBtn.disabled = false;
           }
         } catch (err) {
           showToast(err.message, 'error');
-          // Restore button
-          clockBtn.innerHTML = '<span class="material-symbols-outlined text-3xl">login</span> CLOCK IN <span class="material-symbols-outlined">arrow_forward</span>';
+          clockBtn.innerHTML = '<span class="material-symbols-outlined text-3xl">login</span>&nbsp;CLOCK IN&nbsp;<span class="material-symbols-outlined">arrow_forward</span>';
+          clockBtn.style.background = '#fff';
+          clockBtn.style.color = '#5e0084';
+          clockBtn.style.opacity = '1';
           clockBtn.disabled = false;
-          clockBtn.classList.remove('opacity-75');
         }
       });
     }
