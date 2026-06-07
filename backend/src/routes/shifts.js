@@ -120,7 +120,7 @@ router.post('/:id/claim', authenticate, async (req, res) => {
       data: {
         shiftId,
         userId: req.userId,
-        status: 'confirmed',
+        status: 'claimed',
       },
       include: { shift: { include: { facility: true } } },
     });
