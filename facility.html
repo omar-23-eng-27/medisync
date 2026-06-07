@@ -607,7 +607,6 @@
     loadDashboard();
 
     // ── Rating modal ─────────────────────────────────────────────────────────
-    // Use window.* so onclick attributes in HTML after </script> can reach them
     window._rate = { shiftId: null, claimId: null, stars: 0 };
 
     window.openRateModal = function(shiftId, claimId, caregiverName) {
