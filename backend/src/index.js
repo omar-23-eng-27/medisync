@@ -8,6 +8,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const shiftsRoutes = require('./routes/shifts');
 const referralsRoutes = require('./routes/referrals');
 const profileRoutes = require('./routes/profile');
+const facilityRoutes = require('./routes/facility');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/shifts', shiftsRoutes);
 app.use('/api/referrals', referralsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/facility', facilityRoutes);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((req, res) => {

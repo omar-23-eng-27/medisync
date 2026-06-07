@@ -251,8 +251,9 @@
 
       setLoading(btn, true);
       try {
-        await api.login(email, password);
-        window.location.href = 'dashboard.html';
+        const data = await api.login(email, password);
+        const role = (data.user || api.getUser() || {}).role;
+        window.location.href = role === 'facility_manager' ? 'facility.html' : 'dashboard.html';
       } catch (err) {
         showError(err.message);
         btn.innerHTML = 'Sign In <span class="material-symbols-outlined">arrow_forward</span>';

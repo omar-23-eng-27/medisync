@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>MediSync | Facility Manager</title>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #161a2e; }
+    h1,h2,h3,h4 { font-family: 'Hanken Grotesk', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid #DEDFF0; }
+    .tab-active { background: #5e0084; color: #fff; }
+    .tab-inactive { background: transparent; color: #4e4351; border: 1px solid #DEDFF0; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .status-open     { background:#dcfce7; color:#15803d; }
+    .status-filled   { background:#dbeafe; color:#1d4ed8; }
+    .status-cancelled{ background:#fee2e2; color:#b91c1c; }
+    .status-completed{ background:#f3f4f6; color:#374151; }
+    .claim-claimed   { background:#fef9c3; color:#854d0e; }
+    .claim-confirmed { background:#dcfce7; color:#15803d; }
+    .claim-cancelled { background:#fee2e2; color:#b91c1c; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#fbf8ff]">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center px-6 h-14 w-full fixed top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#EEEEEE]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-[#5e0084] flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings:'FILL' 1;">local_hospital</span>
+      </div>
+      <span class="font-bold text-[#5e0084] text-lg" style="font-family:'Hanken Grotesk',sans-serif;">MediSync</span>
+      <span class="hidden md:inline text-[#4e4351] text-sm font-medium">/ Facility Manager</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="facility-name-header" class="hidden md:inline text-sm font-semibold text-[#161a2e]"></span>
+      <button id="logout-btn" class="flex items-center gap-1 text-sm text-[#4e4351] hover:text-[#5e0084] transition-colors">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="pt-20 pb-10 px-4 max-w-[1100px] mx-auto">
+
+    <!-- Welcome bar -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 id="welcome-heading" class="text-3xl font-bold text-[#161a2e]" style="font-family:'Hanken Grotesk',sans-serif;">Facility Dashboard</h1>
+        <p id="facility-subtitle" class="text-[#4e4351] text-sm mt-1">Manage shifts and caregiver applications</p>
+      </div>
+      <button id="post-shift-btn"
+        class="flex items-center gap-2 bg-[#5e0084] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#5e0084]/20">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Post New Shift
+      </button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-2xl p-5 border border-[#EEEEEE] shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-1">Total Shifts</p>
+        <p id="stat-total" class="text-3xl font-bold text-[#5e0084]" style="font-family:'Hanken Grotesk',sans-serif;">—</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-[#EEEEEE] shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-1">Open</p>
+        <p id="stat-open" class="text-3xl font-bold text-green-600" style="font-family:'Hanken Grotesk',sans-serif;">—</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-[#EEEEEE] shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-1">Filled</p>
+        <p id="stat-filled" class="text-3xl font-bold text-blue-600" style="font-family:'Hanken Grotesk',sans-serif;">—</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 border border-[#EEEEEE] shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-1">Total Claims</p>
+        <p id="stat-claims" class="text-3xl font-bold text-[#161a2e]" style="font-family:'Hanken Grotesk',sans-serif;">—</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn tab-active px-5 py-2 rounded-xl text-sm font-semibold transition-all" data-tab="shifts">All Shifts</button>
+      <button class="tab-btn tab-inactive px-5 py-2 rounded-xl text-sm font-semibold transition-all" data-tab="claims">Applications</button>
+    </div>
+
+    <!-- Shifts tab -->
+    <div id="tab-shifts">
+      <div id="shifts-list" class="space-y-4">
+        <div class="flex items-center justify-center py-12 text-[#4e4351]">
+          <span class="material-symbols-outlined animate-spin mr-2">sync</span> Loading shifts…
+        </div>
+      </div>
+    </div>
+
+    <!-- Claims tab -->
+    <div id="tab-claims" class="hidden">
+      <div class="mb-4">
+        <label class="text-xs font-bold uppercase tracking-wider text-[#4e4351] block mb-2">Filter by Shift</label>
+        <select id="claims-shift-filter" class="h-11 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084] bg-white min-w-[280px]">
+          <option value="">Select a shift to see applications…</option>
+        </select>
+      </div>
+      <div id="claims-list" class="space-y-4">
+        <div class="flex flex-col items-center py-12 text-[#4e4351]">
+          <span class="material-symbols-outlined text-4xl mb-2 opacity-30">people</span>
+          <p class="text-sm">Select a shift above to see caregiver applications</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Post Shift Modal -->
+  <div id="post-modal" class="fixed inset-0 z-[200] flex items-center justify-center px-4 hidden">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="post-backdrop"></div>
+    <div class="relative bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+      <button id="post-close" class="absolute top-4 right-4 text-[#4e4351] hover:text-[#161a2e]">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div class="bg-[#F3EBFF] inline-block px-3 py-1 rounded-lg text-[#5e0084] text-xs font-bold uppercase tracking-wider mb-4">New Shift</div>
+      <h2 class="font-bold text-2xl mb-6" style="font-family:'Hanken Grotesk',sans-serif;">Post a Shift</h2>
+      <form id="post-form" class="space-y-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Shift Title</label>
+          <input id="shift-title" type="text" placeholder="e.g. ICU Night Shift RN" required
+            class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Care Type</label>
+          <select id="shift-caretype" required class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084] bg-white">
+            <option value="">Select care type…</option>
+            <option value="critical-care">Critical Care</option>
+            <option value="geriatric-care">Geriatric Care</option>
+            <option value="home-health">Home Health</option>
+            <option value="pediatric">Pediatric</option>
+            <option value="post-op">Post-Op</option>
+            <option value="general">General Nursing</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Start Date & Time</label>
+            <input id="shift-start" type="datetime-local" required
+              class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">End Date & Time</label>
+            <input id="shift-end" type="datetime-local" required
+              class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Hourly Rate ($)</label>
+            <input id="shift-rate" type="number" min="10" step="0.50" placeholder="45.00" required
+              class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Bonus Amount ($)</label>
+            <input id="shift-bonus" type="number" min="0" step="10" placeholder="0"
+              class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Total Slots</label>
+          <input id="shift-slots" type="number" min="1" max="20" value="1"
+            class="w-full h-12 border border-[#EEEEEE] rounded-xl px-4 text-sm outline-none focus:border-[#5e0084]">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4e4351] mb-2">Description (optional)</label>
+          <textarea id="shift-desc" rows="2" placeholder="Any special requirements or notes…"
+            class="w-full border border-[#EEEEEE] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#5e0084] resize-none"></textarea>
+        </div>
+        <div id="post-error" class="hidden text-xs text-red-600 font-semibold flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">error</span>
+          <span id="post-error-text"></span>
+        </div>
+        <button type="submit" id="post-submit-btn"
+          class="w-full h-12 bg-[#5e0084] text-white rounded-xl font-bold text-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">publish</span>
+          Post Shift
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── Auth guard — facility_manager only ───────────────────────────────────
+    (function() {
+      const token = localStorage.getItem('medisync_token');
+      const user  = JSON.parse(localStorage.getItem('medisync_user') || 'null');
+      if (!token || !user) { window.location.href = 'login.html'; return; }
+      if (user.role !== 'facility_manager') {
+        alert('This page is for facility managers only.');
+        window.location.href = user.role === 'caregiver' ? 'dashboard.html' : 'login.html';
+      }
+    }());
+
+    let allShifts = [];
+
+    // ── Load facility info + shifts ──────────────────────────────────────────
+    async function loadDashboard() {
+      try {
+        const [meRes, shiftsRes] = await Promise.all([
+          api.get('/api/facility/me'),
+          api.get('/api/facility/shifts'),
+        ]);
+
+        document.getElementById('facility-name-header').textContent = meRes.facility.name;
+        document.getElementById('welcome-heading').textContent      = meRes.facility.name;
+        document.getElementById('facility-subtitle').textContent    = `${meRes.facility.address}, ${meRes.facility.city}`;
+
+        allShifts = shiftsRes.shifts || [];
+        renderShifts(allShifts);
+        updateStats(allShifts);
+        populateShiftFilter(allShifts);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function updateStats(shifts) {
+      document.getElementById('stat-total').textContent  = shifts.length;
+      document.getElementById('stat-open').textContent   = shifts.filter(s => s.status === 'open').length;
+      document.getElementById('stat-filled').textContent = shifts.filter(s => s.status === 'filled').length;
+      document.getElementById('stat-claims').textContent = shifts.reduce((sum, s) => sum + s.claimCount, 0);
+    }
+
+    function fmtDT(iso) {
+      return new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderShifts(shifts) {
+      const el = document.getElementById('shifts-list');
+      if (shifts.length === 0) {
+        el.innerHTML = `<div class="flex flex-col items-center py-12 text-[#4e4351]">
+          <span class="material-symbols-outlined text-4xl mb-2 opacity-30">event_busy</span>
+          <p class="text-sm font-semibold">No shifts posted yet</p>
+          <p class="text-xs mt-1">Click "Post New Shift" to get started</p>
+        </div>`;
+        return;
+      }
+      el.innerHTML = shifts.map(s => {
+        const statusCls = `status-${s.status}`;
+        const hours = ((new Date(s.endTime) - new Date(s.startTime)) / 3600000).toFixed(1);
+        return `
+          <div class="bg-white border border-[#EEEEEE] rounded-2xl p-5 hover:border-[#5e0084]/30 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-grow min-w-0">
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 class="font-bold text-[#161a2e]">${s.title}</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${statusCls}">${s.status}</span>
+                </div>
+                <p class="text-sm text-[#4e4351] mb-3">${fmtDT(s.startTime)} → ${fmtDT(s.endTime)} &nbsp;·&nbsp; ${hours}h &nbsp;·&nbsp; $${s.hourlyRate}/hr${s.bonusAmount > 0 ? ` <span class="text-[#5e0084] font-semibold">+$${s.bonusAmount} bonus</span>` : ''}</p>
+                <div class="flex items-center gap-4 text-xs text-[#4e4351]">
+                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">people</span> ${s.claimCount} / ${s.totalSlots} applicants</span>
+                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">medical_services</span> ${s.careType}</span>
+                </div>
+              </div>
+              <div class="flex gap-2 flex-shrink-0">
+                <button onclick="viewClaims('${s.id}')"
+                  class="flex items-center gap-1 px-3 py-2 rounded-xl border border-[#EEEEEE] text-xs font-semibold text-[#5e0084] hover:bg-[#F3EBFF] transition-colors">
+                  <span class="material-symbols-outlined text-[14px]">people</span> View
+                </button>
+                ${s.status === 'open' ? `<button onclick="cancelShift('${s.id}', this)"
+                  class="flex items-center gap-1 px-3 py-2 rounded-xl border border-[#EEEEEE] text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors">
+                  <span class="material-symbols-outlined text-[14px]">cancel</span> Cancel
+                </button>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function populateShiftFilter(shifts) {
+      const sel = document.getElementById('claims-shift-filter');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Select a shift to see applications…</option>' +
+        shifts.map(s => `<option value="${s.id}" ${s.id === current ? 'selected' : ''}>${s.title} — ${fmtDT(s.startTime)}</option>`).join('');
+    }
+
+    // ── View claims for a shift ──────────────────────────────────────────────
+    async function viewClaims(shiftId) {
+      // Switch to claims tab and select shift
+      switchTab('claims');
+      document.getElementById('claims-shift-filter').value = shiftId;
+      loadClaims(shiftId);
+    }
+
+    async function loadClaims(shiftId) {
+      if (!shiftId) return;
+      const el = document.getElementById('claims-list');
+      el.innerHTML = `<div class="flex items-center justify-center py-8 text-[#4e4351]"><span class="material-symbols-outlined animate-spin mr-2">sync</span> Loading…</div>`;
+      try {
+        const data = await api.get(`/api/facility/shifts/${shiftId}/claims`);
+        const { claims, shift } = data;
+        if (claims.length === 0) {
+          el.innerHTML = `<div class="flex flex-col items-center py-10 text-[#4e4351]">
+            <span class="material-symbols-outlined text-4xl mb-2 opacity-30">inbox</span>
+            <p class="text-sm font-semibold">No applications yet</p>
+            <p class="text-xs mt-1">Caregivers who claim this shift will appear here</p>
+          </div>`;
+          return;
+        }
+        el.innerHTML = `<p class="text-sm font-semibold text-[#4e4351] mb-3">${claims.length} application${claims.length !== 1 ? 's' : ''} for <span class="text-[#5e0084]">${shift.title}</span></p>` +
+          claims.map(c => {
+            const stars = c.caregiver.rating > 0 ? `${c.caregiver.rating.toFixed(1)} ★` : 'No rating';
+            const claimCls = `claim-${c.status}`;
+            const initials = c.caregiver.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+            return `
+              <div class="bg-white border border-[#EEEEEE] rounded-2xl p-5 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-[#F3EBFF] text-[#5e0084] font-bold flex items-center justify-center">${initials}</div>
+                  <div>
+                    <p class="font-semibold text-[#161a2e] text-sm">${c.caregiver.name}</p>
+                    <p class="text-xs text-[#4e4351]">${c.caregiver.specialization || 'Caregiver'} &nbsp;·&nbsp; ${stars}</p>
+                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${claimCls}">${c.status}</span>
+                  </div>
+                </div>
+                ${c.status === 'claimed' ? `
+                <div class="flex gap-2 flex-shrink-0">
+                  <button onclick="updateClaim('${shiftId}', '${c.claimId}', 'approve', this)"
+                    class="flex items-center gap-1 px-3 py-2 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-green-700 hover:bg-green-100 transition-colors">
+                    <span class="material-symbols-outlined text-[14px]">check_circle</span> Approve
+                  </button>
+                  <button onclick="updateClaim('${shiftId}', '${c.claimId}', 'reject', this)"
+                    class="flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors">
+                    <span class="material-symbols-outlined text-[14px]">cancel</span> Reject
+                  </button>
+                </div>` : ''}
+              </div>`;
+          }).join('');
+      } catch (err) {
+        el.innerHTML = `<p class="text-center text-red-500 text-sm py-6">${err.message}</p>`;
+      }
+    }
+
+    async function updateClaim(shiftId, claimId, action, btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[14px]">sync</span>';
+      try {
+        await api.put(`/api/facility/shifts/${shiftId}/claims/${claimId}`, { action });
+        showToast(action === 'approve' ? 'Caregiver approved!' : 'Application rejected');
+        loadClaims(shiftId);
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+      }
+    }
+
+    async function cancelShift(shiftId, btn) {
+      if (!confirm('Cancel this shift? This cannot be undone.')) return;
+      btn.disabled = true;
+      try {
+        await api.del(`/api/facility/shifts/${shiftId}`);
+        showToast('Shift cancelled');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+      }
+    }
+
+    // ── Tabs ────────────────────────────────────────────────────────────────
+    function switchTab(name) {
+      document.getElementById('tab-shifts').classList.toggle('hidden', name !== 'shifts');
+      document.getElementById('tab-claims').classList.toggle('hidden', name !== 'claims');
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        const active = b.dataset.tab === name;
+        b.className = `tab-btn ${active ? 'tab-active' : 'tab-inactive'} px-5 py-2 rounded-xl text-sm font-semibold transition-all`;
+      });
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('claims-shift-filter').addEventListener('change', function() {
+      loadClaims(this.value);
+    });
+
+    // ── Post Shift Modal ─────────────────────────────────────────────────────
+    const postModal = document.getElementById('post-modal');
+
+    document.getElementById('post-shift-btn').addEventListener('click', () => {
+      document.getElementById('post-form').reset();
+      document.getElementById('post-error').classList.add('hidden');
+      // Set minimum datetime to now
+      const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16);
+      document.getElementById('shift-start').min = now;
+      document.getElementById('shift-end').min   = now;
+      postModal.classList.remove('hidden');
+    });
+
+    function closePostModal() { postModal.classList.add('hidden'); }
+    document.getElementById('post-close').addEventListener('click', closePostModal);
+    document.getElementById('post-backdrop').addEventListener('click', closePostModal);
+
+    document.getElementById('post-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl  = document.getElementById('post-error');
+      const errTxt = document.getElementById('post-error-text');
+      const btn    = document.getElementById('post-submit-btn');
+      errEl.classList.add('hidden');
+
+      const body = {
+        title:       document.getElementById('shift-title').value.trim(),
+        careType:    document.getElementById('shift-caretype').value,
+        startTime:   document.getElementById('shift-start').value,
+        endTime:     document.getElementById('shift-end').value,
+        hourlyRate:  document.getElementById('shift-rate').value,
+        bonusAmount: document.getElementById('shift-bonus').value || 0,
+        totalSlots:  document.getElementById('shift-slots').value || 1,
+        description: document.getElementById('shift-desc').value.trim(),
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">sync</span>&nbsp;Posting…';
+      try {
+        await api.post('/api/facility/shifts', body);
+        closePostModal();
+        showToast('Shift posted successfully!');
+        loadDashboard();
+      } catch (err) {
+        errTxt.textContent = err.message;
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">publish</span>&nbsp;Post Shift';
+      }
+    });
+
+    // ── Logout ───────────────────────────────────────────────────────────────
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      if (confirm('Log out of MediSync?')) api.logout();
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>

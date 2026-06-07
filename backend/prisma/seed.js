@@ -91,6 +91,24 @@ async function main() {
     },
   });
 
+  // Facility manager demo user
+  await prisma.user.upsert({
+    where: { email: 'manager@medisync.dev' },
+    update: {},
+    create: {
+      id: 'user-facility-manager',
+      email: 'manager@medisync.dev',
+      password: hashedPassword,
+      name: 'James Carter',
+      role: 'facility_manager',
+      facilityId: 'facility-mercy-general',
+      points: 0,
+      rating: 0,
+      ratingCount: 0,
+      referralCode: 'JAMES001',
+    },
+  });
+
   // Secondary demo user
   const admin = await prisma.user.upsert({
     where: { email: 'admin@medisync.dev' },

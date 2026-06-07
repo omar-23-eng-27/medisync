@@ -12,7 +12,8 @@ model User {
   email          String   @unique
   password       String
   name           String
-  role           String   @default("caregiver") // caregiver | admin
+  role           String   @default("caregiver") // caregiver | facility_manager | admin
+  facilityId     String?  // set for facility_manager role
   specialization String?
   yearsExperience Int?
   bio            String?
