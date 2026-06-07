@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
+const { sendProfileUpdated } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -101,6 +102,8 @@ router.put('/', authenticate, async (req, res) => {
       },
     });
 
+    sendProfileUpdated({ toEmail: updated.email, toName: updated.name })
+      .catch(err => console.error('[mailer] profile updated email failed:', err));
     return res.json({ user: updated });
   } catch (err) {
     console.error('[profile/PUT]', err);

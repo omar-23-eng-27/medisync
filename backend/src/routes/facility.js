@@ -1,7 +1,7 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
-const { sendClaimApproved, sendShiftCancelled } = require('../lib/mailer');
+const { sendClaimApproved, sendClaimRejected, sendShiftCancelled } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -199,8 +199,8 @@ router.put('/shifts/:id/claims/:claimId', authenticate, requireFacilityManager, 
       include: { user: true },
     });
 
+    const facility = await prisma.facility.findUnique({ where: { id: req.userFacilityId } });
     if (action === 'approve') {
-      const facility = await prisma.facility.findUnique({ where: { id: req.userFacilityId } });
       sendClaimApproved({
         toEmail: updated.user.email,
         toName: updated.user.name,
@@ -208,6 +208,13 @@ router.put('/shifts/:id/claims/:claimId', authenticate, requireFacilityManager, 
         startTime: shift.startTime,
         facilityName: facility?.name || 'the facility',
       }).catch(err => console.error('[mailer] approve email failed:', err));
+    } else {
+      sendClaimRejected({
+        toEmail: updated.user.email,
+        toName: updated.user.name,
+        shiftTitle: shift.title,
+        facilityName: facility?.name || 'the facility',
+      }).catch(err => console.error('[mailer] reject email failed:', err));
     }
 
     return res.json({ claim: updated, message: action === 'approve' ? 'Caregiver confirmed' : 'Claim rejected' });

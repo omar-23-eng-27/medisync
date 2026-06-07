@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
+const { sendWelcome } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -83,6 +84,8 @@ router.post('/register', async (req, res) => {
     }
 
     const token = signToken(user);
+    sendWelcome({ toEmail: user.email, toName: user.name })
+      .catch(err => console.error('[mailer] welcome email failed:', err));
     return res.status(201).json({ token, user: safeUser(user) });
   } catch (err) {
     console.error('[register]', err);

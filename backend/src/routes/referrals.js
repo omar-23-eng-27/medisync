@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
+const { sendReferralInvite } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -69,7 +70,7 @@ router.post('/', authenticate, async (req, res) => {
     // Can't refer yourself
     const currentUser = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { email: true },
+      select: { email: true, name: true, referralCode: true },
     });
     if (currentUser.email === email) {
       return res.status(400).json({ error: "You can't refer yourself" });
@@ -96,6 +97,13 @@ router.post('/', authenticate, async (req, res) => {
         status: alreadyUser ? 'verified' : 'pending',
       },
     });
+
+    sendReferralInvite({
+      toEmail: email,
+      toName: name,
+      fromName: currentUser.name || 'A MediSync caregiver',
+      referralCode: currentUser.referralCode,
+    }).catch(err => console.error('[mailer] referral invite failed:', err));
 
     return res.status(201).json({
       message: 'Referral submitted successfully',
