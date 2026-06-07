@@ -103,10 +103,16 @@ router.delete('/shifts/:id', authenticate, requireFacilityManager, async (req, r
     if (!shift) return res.status(404).json({ error: 'Shift not found' });
     if (shift.status !== 'open') return res.status(400).json({ error: 'Only open shifts can be cancelled' });
 
-    await prisma.shift.update({
-      where: { id: req.params.id },
-      data: { status: 'cancelled' },
-    });
+    await prisma.$transaction([
+      prisma.shiftClaim.updateMany({
+        where: { shiftId: req.params.id, status: { in: ['claimed', 'confirmed'] } },
+        data: { status: 'cancelled' },
+      }),
+      prisma.shift.update({
+        where: { id: req.params.id },
+        data: { status: 'cancelled' },
+      }),
+    ]);
     return res.json({ message: 'Shift cancelled' });
   } catch (err) {
     console.error('[facility/shifts DELETE]', err);
