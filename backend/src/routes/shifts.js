@@ -11,6 +11,7 @@ router.get('/upcoming', authenticate, async (req, res) => {
       where: {
         userId: req.userId,
         status: { in: ['claimed', 'confirmed', 'active'] },
+        shift: { status: { not: 'cancelled' } },
       },
       orderBy: { shift: { startTime: 'asc' } },
       include: {
