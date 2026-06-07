@@ -607,47 +607,48 @@
     loadDashboard();
 
     // ── Rating modal ─────────────────────────────────────────────────────────
-    let rateShiftId = null, rateClaimId = null, rateStars = 0;
+    // Use window.* so onclick attributes in HTML after </script> can reach them
+    window._rate = { shiftId: null, claimId: null, stars: 0 };
 
-    function openRateModal(shiftId, claimId, caregiverName) {
-      rateShiftId = shiftId;
-      rateClaimId = claimId;
-      rateStars = 0;
+    window.openRateModal = function(shiftId, claimId, caregiverName) {
+      window._rate = { shiftId, claimId, stars: 0 };
       document.getElementById('rate-caregiver-name').textContent = caregiverName;
-      const submitBtn = document.getElementById('rate-submit-btn');
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.5';
-      submitBtn.textContent = 'Submit Rating';
+      const btn = document.getElementById('rate-submit-btn');
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.textContent = 'Submit Rating';
       document.getElementById('rate-error-text').style.display = 'none';
-      renderStars(0);
+      window.renderStars(0);
       document.getElementById('rate-modal').style.display = 'flex';
-    }
+    };
 
-    function closeRateModal() {
+    window.closeRateModal = function() {
       document.getElementById('rate-modal').style.display = 'none';
-    }
+    };
 
-    function renderStars(hovered) {
+    window.renderStars = function(hovered) {
+      const s = window._rate.stars;
       const container = document.getElementById('rate-stars');
       container.innerHTML = [1,2,3,4,5].map(n => `
-        <button onclick="selectStar(${n})" onmouseover="renderStars(${n})" onmouseout="renderStars(${rateStars})"
-          style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;color:${n <= (hovered || rateStars) ? '#f59e0b' : '#e5e7eb'};transition:color 0.1s;">
+        <button onclick="window.selectStar(${n})" onmouseover="window.renderStars(${n})" onmouseout="window.renderStars(${s})"
+          style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;color:${n <= (hovered || s) ? '#f59e0b' : '#e5e7eb'};transition:color 0.1s;">
           ★
         </button>`).join('');
-    }
+    };
 
-    function selectStar(n) {
-      rateStars = n;
-      renderStars(n);
+    window.selectStar = function(n) {
+      window._rate.stars = n;
+      window.renderStars(n);
       const btn = document.getElementById('rate-submit-btn');
       btn.disabled = false;
       btn.style.opacity = '1';
-    }
+    };
 
-    async function submitRating() {
+    window.submitRating = async function() {
       const errEl = document.getElementById('rate-error-text');
       errEl.style.display = 'none';
-      if (!rateStars) {
+      const { shiftId, claimId, stars } = window._rate;
+      if (!stars) {
         errEl.textContent = 'Please select a star rating first.';
         errEl.style.display = 'block';
         return;
@@ -657,10 +658,10 @@
       btn.style.opacity = '0.7';
       btn.textContent = 'Submitting…';
       try {
-        await api.post(`/api/facility/shifts/${rateShiftId}/claims/${rateClaimId}/rate`, { stars: rateStars });
-        showToast(rateStars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
-        closeRateModal();
-        loadClaims(rateShiftId);
+        await api.post(`/api/facility/shifts/${shiftId}/claims/${claimId}/rate`, { stars });
+        showToast(stars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
+        window.closeRateModal();
+        loadClaims(shiftId);
       } catch (err) {
         errEl.textContent = err.message || 'Something went wrong. Please try again.';
         errEl.style.display = 'block';
@@ -668,7 +669,7 @@
         btn.style.opacity = '1';
         btn.textContent = 'Submit Rating';
       }
-    }
+    };
 
   </script>
 
