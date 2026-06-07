@@ -10,6 +10,7 @@ const referralsRoutes = require('./routes/referrals');
 const profileRoutes = require('./routes/profile');
 const facilityRoutes = require('./routes/facility');
 const messagesRoutes = require('./routes/messages');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api/referrals', referralsRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/facility', facilityRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
