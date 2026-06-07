@@ -242,6 +242,28 @@
     </div>
   </div>
 
+  <!-- Rating Modal -->
+  <div id="rate-modal" style="display:none;position:fixed;inset:0;z-index:300;align-items:center;justify-content:center;padding:16px;">
+    <div id="rate-backdrop" onclick="closeRateModal()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);cursor:pointer;"></div>
+    <div style="position:relative;background:#fff;border-radius:24px;padding:32px;width:100%;max-width:400px;box-shadow:0 24px 48px rgba(0,0,0,0.15);z-index:10;text-align:center;">
+      <button onclick="closeRateModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#4e4351;">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div style="width:56px;height:56px;border-radius:50%;background:#fefce8;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined" style="font-size:28px;color:#f59e0b;font-variation-settings:'FILL' 1;">star</span>
+      </div>
+      <h2 style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:800;color:#161a2e;margin:0 0 6px;">Rate Caregiver</h2>
+      <p style="font-size:13px;color:#4e4351;margin:0 0 24px;">How did <strong id="rate-caregiver-name"></strong> perform?</p>
+      <div id="rate-stars" style="display:flex;justify-content:center;gap:4px;margin-bottom:8px;"></div>
+      <p style="font-size:11px;color:#4e4351;margin:0 0 12px;">5 stars awards the caregiver 50 bonus points</p>
+      <p id="rate-error-text" style="display:none;font-size:12px;color:#b91c1c;font-weight:600;margin:0 0 12px;padding:8px 12px;background:#fee2e2;border-radius:8px;"></p>
+      <button id="rate-submit-btn" onclick="submitRating()" disabled
+        style="width:100%;height:48px;background:#5e0084;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;opacity:0.5;transition:opacity 0.2s;">
+        Submit Rating
+      </button>
+    </div>
+  </div>
+
   <script>
     // ── Auth guard — facility_manager only ───────────────────────────────────
     (function() {
@@ -607,93 +629,62 @@
     loadDashboard();
 
     // ── Rating modal ─────────────────────────────────────────────────────────
-    window._rate = { shiftId: null, claimId: null, stars: 0 };
+    var _rateShiftId = null, _rateClaimId = null, _rateStars = 0;
 
-    window.openRateModal = function(shiftId, claimId, caregiverName) {
-      window._rate = { shiftId, claimId, stars: 0 };
+    function openRateModal(shiftId, claimId, caregiverName) {
+      _rateShiftId = shiftId; _rateClaimId = claimId; _rateStars = 0;
       document.getElementById('rate-caregiver-name').textContent = caregiverName;
-      const btn = document.getElementById('rate-submit-btn');
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.textContent = 'Submit Rating';
+      var btn = document.getElementById('rate-submit-btn');
+      btn.disabled = true; btn.style.opacity = '0.5'; btn.textContent = 'Submit Rating';
       document.getElementById('rate-error-text').style.display = 'none';
-      window.renderStars(0);
+      renderStars(0);
       document.getElementById('rate-modal').style.display = 'flex';
-    };
+    }
 
-    window.closeRateModal = function() {
+    function closeRateModal() {
       document.getElementById('rate-modal').style.display = 'none';
-    };
+    }
 
-    window.renderStars = function(hovered) {
-      const s = window._rate.stars;
-      const container = document.getElementById('rate-stars');
-      container.innerHTML = [1,2,3,4,5].map(n => `
-        <button onclick="window.selectStar(${n})" onmouseover="window.renderStars(${n})" onmouseout="window.renderStars(${s})"
-          style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;color:${n <= (hovered || s) ? '#f59e0b' : '#e5e7eb'};transition:color 0.1s;">
-          ★
-        </button>`).join('');
-    };
+    function renderStars(hovered) {
+      var s = _rateStars;
+      var container = document.getElementById('rate-stars');
+      container.innerHTML = [1,2,3,4,5].map(function(n) {
+        return '<button onclick="selectStar(' + n + ')" onmouseover="renderStars(' + n + ')" onmouseout="renderStars(' + s + ')"'
+          + ' style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;'
+          + 'color:' + (n <= (hovered || s) ? '#f59e0b' : '#e5e7eb') + ';transition:color 0.1s;">'
+          + '★</button>';
+      }).join('');
+    }
 
-    window.selectStar = function(n) {
-      window._rate.stars = n;
-      window.renderStars(n);
-      const btn = document.getElementById('rate-submit-btn');
-      btn.disabled = false;
-      btn.style.opacity = '1';
-    };
+    function selectStar(n) {
+      _rateStars = n;
+      renderStars(n);
+      var btn = document.getElementById('rate-submit-btn');
+      btn.disabled = false; btn.style.opacity = '1';
+    }
 
-    window.submitRating = async function() {
-      const errEl = document.getElementById('rate-error-text');
+    async function submitRating() {
+      var errEl = document.getElementById('rate-error-text');
       errEl.style.display = 'none';
-      const { shiftId, claimId, stars } = window._rate;
-      if (!stars) {
+      if (!_rateStars) {
         errEl.textContent = 'Please select a star rating first.';
         errEl.style.display = 'block';
         return;
       }
-      const btn = document.getElementById('rate-submit-btn');
-      btn.disabled = true;
-      btn.style.opacity = '0.7';
-      btn.textContent = 'Submitting…';
+      var btn = document.getElementById('rate-submit-btn');
+      btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Submitting…';
       try {
-        await api.post(`/api/facility/shifts/${shiftId}/claims/${claimId}/rate`, { stars });
-        showToast(stars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
-        window.closeRateModal();
-        loadClaims(shiftId);
+        await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
+        showToast(_rateStars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
+        closeRateModal();
+        loadClaims(_rateShiftId);
       } catch (err) {
-        errEl.textContent = err.message || 'Something went wrong. Please try again.';
+        errEl.textContent = err.message || 'Something went wrong.';
         errEl.style.display = 'block';
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.textContent = 'Submit Rating';
+        btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Submit Rating';
       }
-    };
+    }
 
   </script>
-
-  <!-- Rating Modal -->
-  <div id="rate-modal" style="display:none;position:fixed;inset:0;z-index:300;align-items:center;justify-content:center;padding:16px;">
-    <div id="rate-backdrop" onclick="closeRateModal()" style="position:absolute;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);cursor:pointer;"></div>
-    <div style="position:relative;background:#fff;border-radius:24px;padding:32px;width:100%;max-width:400px;box-shadow:0 24px 48px rgba(0,0,0,0.15);z-index:10;text-align:center;">
-      <button onclick="closeRateModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#4e4351;">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-      <div style="width:56px;height:56px;border-radius:50%;background:#fefce8;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
-        <span class="material-symbols-outlined" style="font-size:28px;color:#f59e0b;font-variation-settings:'FILL' 1;">star</span>
-      </div>
-      <h2 style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:800;color:#161a2e;margin:0 0 6px;">Rate Caregiver</h2>
-      <p style="font-size:13px;color:#4e4351;margin:0 0 24px;">How did <strong id="rate-caregiver-name"></strong> perform?</p>
-      <div id="rate-stars" style="display:flex;justify-content:center;gap:4px;margin-bottom:8px;"></div>
-      <p style="font-size:11px;color:#4e4351;margin:0 0 12px;">5 stars awards the caregiver 50 bonus points</p>
-      <p id="rate-error-text" style="display:none;font-size:12px;color:#b91c1c;font-weight:600;margin:0 0 12px;padding:8px 12px;background:#fee2e2;border-radius:8px;"></p>
-      <button id="rate-submit-btn" onclick="submitRating()" disabled
-        style="width:100%;height:48px;background:#5e0084;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;opacity:0.5;transition:opacity 0.2s;"
-        onmouseover="if(!this.disabled)this.style.opacity='0.9'" onmouseout="if(!this.disabled)this.style.opacity='1'">
-        Submit Rating
-      </button>
-    </div>
-  </div>
-
 </body>
 </html>
