@@ -9,6 +9,7 @@ const shiftsRoutes = require('./routes/shifts');
 const referralsRoutes = require('./routes/referrals');
 const profileRoutes = require('./routes/profile');
 const facilityRoutes = require('./routes/facility');
+const messagesRoutes = require('./routes/messages');
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/shifts', shiftsRoutes);
 app.use('/api/referrals', referralsRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/facility', facilityRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // ── 404 ──────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
