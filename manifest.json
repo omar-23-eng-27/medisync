@@ -1,0 +1,26 @@
+{
+  "name": "MediSync",
+  "short_name": "MediSync",
+  "description": "Caregiver Coordination Platform — find shifts, earn rewards, coordinate care.",
+  "start_url": "/medisync/",
+  "scope": "/medisync/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf8ff",
+  "theme_color": "#5e0084",
+  "categories": ["health", "medical", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -7,6 +7,12 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <link rel="stylesheet" href="css/tailwind.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="theme-color" content="#5e0084">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MediSync">
+  <script src="js/sw-register.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script id="tailwind-config">
@@ -112,7 +118,12 @@
         <span class="font-display text-2xl font-black text-primary tracking-tighter">MediSync</span>
       </a>
     </div>
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
+      <button id="pwa-install-btn" onclick="installPWA()"
+        style="display:none;align-items:center;gap:6px;padding:6px 14px;background:#5e0084;color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">
+        <span class="material-symbols-outlined" style="font-size:16px;color:#fff;">download</span>
+        Install App
+      </button>
       <button class="relative p-2 text-on-surface-variant bg-surface-container rounded-full hover:bg-surface-variant transition-colors">
         <span class="material-symbols-outlined">notifications</span>
         <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-background"></span>
