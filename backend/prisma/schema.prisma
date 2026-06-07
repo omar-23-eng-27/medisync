@@ -70,10 +70,12 @@ model ShiftClaim {
   shiftId    String
   userId     String
   status     String    @default("claimed") // claimed | confirmed | active | completed | cancelled
-  clockInAt  DateTime?
-  clockOutAt DateTime?
-  hoursWorked Float?
-  pointsEarned Int?
+  clockInAt      DateTime?
+  clockOutAt     DateTime?
+  hoursWorked    Float?
+  pointsEarned   Int?
+  ratedByManager Boolean   @default(false)
+  managerRating  Int?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 

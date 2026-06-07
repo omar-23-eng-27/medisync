@@ -165,6 +165,8 @@ router.get('/shifts/:id/claims', authenticate, requireFacilityManager, async (re
         claimId: c.id,
         status: c.status,
         createdAt: c.createdAt,
+        ratedByManager: c.ratedByManager,
+        managerRating: c.managerRating,
         caregiver: c.user,
       })),
     });
@@ -221,6 +223,71 @@ router.put('/shifts/:id/claims/:claimId', authenticate, requireFacilityManager, 
   } catch (err) {
     console.error('[facility/claims PUT]', err);
     return res.status(500).json({ error: 'Could not update claim' });
+  }
+});
+
+// ── POST /api/facility/shifts/:id/claims/:claimId/rate  — rate a caregiver ──
+router.post('/shifts/:id/claims/:claimId/rate', authenticate, requireFacilityManager, async (req, res) => {
+  const stars = parseInt(req.body.stars);
+  if (!stars || stars < 1 || stars > 5) {
+    return res.status(400).json({ error: 'stars must be 1–5' });
+  }
+
+  try {
+    const shift = await prisma.shift.findFirst({
+      where: { id: req.params.id, facilityId: req.userFacilityId },
+    });
+    if (!shift) return res.status(404).json({ error: 'Shift not found' });
+
+    const claim = await prisma.shiftClaim.findFirst({
+      where: { id: req.params.claimId, shiftId: req.params.id },
+      include: { user: true },
+    });
+    if (!claim) return res.status(404).json({ error: 'Claim not found' });
+    if (claim.status !== 'completed') return res.status(400).json({ error: 'Can only rate completed shifts' });
+    if (claim.ratedByManager) return res.status(409).json({ error: 'Already rated' });
+
+    // Running average: newRating = (oldRating * oldCount + stars) / (oldCount + 1)
+    const oldRating = claim.user.rating || 0;
+    const oldCount  = claim.user.ratingCount || 0;
+    const newCount  = oldCount + 1;
+    const newRating = Math.round(((oldRating * oldCount + stars) / newCount) * 10) / 10;
+
+    const ops = [
+      prisma.shiftClaim.update({
+        where: { id: claim.id },
+        data: { ratedByManager: true, managerRating: stars },
+      }),
+      prisma.user.update({
+        where: { id: claim.userId },
+        data: { rating: newRating, ratingCount: newCount },
+      }),
+    ];
+
+    // Award 50 bonus points for a 5-star rating
+    if (stars === 5) {
+      ops.push(
+        prisma.user.update({
+          where: { id: claim.userId },
+          data: { points: { increment: 50 } },
+        }),
+        prisma.pointTransaction.create({
+          data: {
+            userId: claim.userId,
+            points: 50,
+            reason: 'rating-bonus',
+            shiftId: req.params.id,
+            meta: { stars, shiftTitle: shift.title },
+          },
+        })
+      );
+    }
+
+    await prisma.$transaction(ops);
+    return res.json({ message: 'Rating submitted', newRating, newCount });
+  } catch (err) {
+    console.error('[facility/rate]', err);
+    return res.status(500).json({ error: 'Could not submit rating' });
   }
 });
 
