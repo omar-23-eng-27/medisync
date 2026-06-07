@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
+const { sendClaimApproved, sendShiftCancelled } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -103,6 +104,14 @@ router.delete('/shifts/:id', authenticate, requireFacilityManager, async (req, r
     if (!shift) return res.status(404).json({ error: 'Shift not found' });
     if (!['open', 'filled'].includes(shift.status)) return res.status(400).json({ error: 'Only open or filled shifts can be cancelled' });
 
+    // Fetch affected caregivers before cancelling
+    const affectedClaims = await prisma.shiftClaim.findMany({
+      where: { shiftId: req.params.id, status: { in: ['claimed', 'confirmed'] } },
+      include: { user: { select: { email: true, name: true } } },
+    });
+
+    const facility = await prisma.facility.findUnique({ where: { id: req.userFacilityId } });
+
     await prisma.$transaction([
       prisma.shiftClaim.updateMany({
         where: { shiftId: req.params.id, status: { in: ['claimed', 'confirmed'] } },
@@ -113,6 +122,18 @@ router.delete('/shifts/:id', authenticate, requireFacilityManager, async (req, r
         data: { status: 'cancelled' },
       }),
     ]);
+
+    // Send cancellation emails (non-blocking)
+    for (const c of affectedClaims) {
+      sendShiftCancelled({
+        toEmail: c.user.email,
+        toName: c.user.name,
+        shiftTitle: shift.title,
+        startTime: shift.startTime,
+        facilityName: facility?.name || 'the facility',
+      }).catch(err => console.error('[mailer] cancel email failed:', err));
+    }
+
     return res.json({ message: 'Shift cancelled' });
   } catch (err) {
     console.error('[facility/shifts DELETE]', err);
@@ -175,7 +196,19 @@ router.put('/shifts/:id/claims/:claimId', authenticate, requireFacilityManager, 
     const updated = await prisma.shiftClaim.update({
       where: { id: req.params.claimId },
       data: { status: newStatus },
+      include: { user: true },
     });
+
+    if (action === 'approve') {
+      const facility = await prisma.facility.findUnique({ where: { id: req.userFacilityId } });
+      sendClaimApproved({
+        toEmail: updated.user.email,
+        toName: updated.user.name,
+        shiftTitle: shift.title,
+        startTime: shift.startTime,
+        facilityName: facility?.name || 'the facility',
+      }).catch(err => console.error('[mailer] approve email failed:', err));
+    }
 
     return res.json({ claim: updated, message: action === 'approve' ? 'Caregiver confirmed' : 'Claim rejected' });
   } catch (err) {
