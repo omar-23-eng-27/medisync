@@ -20,7 +20,8 @@
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^8.0.10"
+    "nodemailer": "^8.0.10",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "prisma": "5.22.0"
