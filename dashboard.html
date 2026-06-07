@@ -571,6 +571,7 @@
             clockBtn.style.color = '#fff';
             clockBtn.style.opacity = '1';
             clockBtn.disabled = true;
+            setTimeout(loadDashboard, 800);
           } else {
             await api.clockIn(nextShiftId);
             claimStatus = 'active';

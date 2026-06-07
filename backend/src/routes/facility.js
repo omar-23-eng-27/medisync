@@ -253,6 +253,9 @@ router.post('/shifts/:id/claims/:claimId/rate', authenticate, requireFacilityMan
     const newCount  = oldCount + 1;
     const newRating = Math.round(((oldRating * oldCount + stars) / newCount) * 10) / 10;
 
+    const userUpdateData = { rating: newRating, ratingCount: newCount };
+    if (stars === 5) userUpdateData.points = { increment: 50 };
+
     const ops = [
       prisma.shiftClaim.update({
         where: { id: claim.id },
@@ -260,27 +263,20 @@ router.post('/shifts/:id/claims/:claimId/rate', authenticate, requireFacilityMan
       }),
       prisma.user.update({
         where: { id: claim.userId },
-        data: { rating: newRating, ratingCount: newCount },
+        data: userUpdateData,
       }),
     ];
 
-    // Award 50 bonus points for a 5-star rating
     if (stars === 5) {
-      ops.push(
-        prisma.user.update({
-          where: { id: claim.userId },
-          data: { points: { increment: 50 } },
-        }),
-        prisma.pointTransaction.create({
-          data: {
-            userId: claim.userId,
-            points: 50,
-            reason: 'rating-bonus',
-            shiftId: req.params.id,
-            meta: { stars, shiftTitle: shift.title },
-          },
-        })
-      );
+      ops.push(prisma.pointTransaction.create({
+        data: {
+          userId: claim.userId,
+          points: 50,
+          reason: 'rating-bonus',
+          shiftId: req.params.id,
+          meta: { stars, shiftTitle: shift.title },
+        },
+      }));
     }
 
     await prisma.$transaction(ops);
