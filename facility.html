@@ -273,7 +273,7 @@
                   class="flex items-center gap-1 px-3 py-2 rounded-xl border border-[#EEEEEE] text-xs font-semibold text-[#5e0084] hover:bg-[#F3EBFF] transition-colors">
                   <span class="material-symbols-outlined text-[14px]">people</span> View
                 </button>
-                ${s.status === 'open' ? `<button onclick="cancelShift('${s.id}', this)"
+                ${(s.status === 'open' || s.status === 'filled') ? `<button onclick="cancelShift('${s.id}', this)"
                   class="flex items-center gap-1 px-3 py-2 rounded-xl border border-[#EEEEEE] text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors">
                   <span class="material-symbols-outlined text-[14px]">cancel</span> Cancel
                 </button>` : ''}
