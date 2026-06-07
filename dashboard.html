@@ -347,14 +347,14 @@
 
   <!-- Messages FAB -->
   <button id="msg-fab" onclick="openMessages()"
-    class="fixed bottom-24 md:bottom-8 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-all"
-    style="background:#5e0084;">
-    <span class="material-symbols-outlined text-white">chat</span>
-    <span id="msg-badge" class="hidden absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center">0</span>
+    style="position:fixed;bottom:96px;right:24px;z-index:400;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#5e0084;color:#fff;box-shadow:0 8px 24px rgba(94,0,132,0.35);border:none;cursor:pointer;transition:transform 0.2s;"
+    onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+    <span class="material-symbols-outlined" style="color:#fff;font-size:24px;">chat</span>
+    <span id="msg-badge" style="display:none;position:absolute;top:-2px;right:-2px;width:20px;height:20px;background:#ef4444;border-radius:50%;color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center;">0</span>
   </button>
 
   <!-- Messages Drawer -->
-  <div id="msg-drawer" class="fixed inset-y-0 right-0 z-[300] w-full max-w-sm bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+  <div id="msg-drawer" style="position:fixed;top:0;right:0;bottom:0;z-index:500;width:100%;max-width:380px;background:#fff;box-shadow:-8px 0 40px rgba(0,0,0,0.15);transform:translateX(100%);transition:transform 0.3s ease;display:flex;flex-direction:column;">
     <div class="flex items-center justify-between px-5 py-4 border-b border-[#EEEEEE]">
       <h2 style="font-family:'Hanken Grotesk',sans-serif;" class="text-xl font-bold text-[#161a2e]">Messages</h2>
       <button onclick="closeMessages()" class="text-[#4e4351] hover:text-[#161a2e]"><span class="material-symbols-outlined">close</span></button>
@@ -380,7 +380,7 @@
       </div>
     </div>
   </div>
-  <div id="msg-overlay" class="fixed inset-0 bg-black/30 z-[290] hidden" onclick="closeMessages()"></div>
+  <div id="msg-overlay" onclick="closeMessages()" style="position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:490;display:none;"></div>
 
   <!-- Bottom Nav -->
   <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-t border-border-light px-6 py-3 flex justify-between items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
@@ -634,22 +634,21 @@
     let currentReceiverId = null;
 
     function openMessages() {
-      document.getElementById('msg-drawer').classList.remove('translate-x-full');
-      document.getElementById('msg-overlay').classList.remove('hidden');
+      document.getElementById('msg-drawer').style.transform = 'translateX(0)';
+      document.getElementById('msg-overlay').style.display = 'block';
       showConversationsList();
       loadConversations();
     }
 
     function closeMessages() {
-      document.getElementById('msg-drawer').classList.add('translate-x-full');
-      document.getElementById('msg-overlay').classList.add('hidden');
+      document.getElementById('msg-drawer').style.transform = 'translateX(100%)';
+      document.getElementById('msg-overlay').style.display = 'none';
     }
 
     function showConversationsList() {
-      document.getElementById('msg-conversations').classList.remove('hidden');
+      document.getElementById('msg-conversations').style.display = 'block';
       const tc = document.getElementById('msg-thread-container');
-      tc.classList.add('hidden');
-      tc.classList.remove('flex');
+      tc.style.display = 'none';
       currentReceiverId = null;
     }
 
@@ -688,10 +687,9 @@
 
     async function openThread(userId, name) {
       currentReceiverId = userId;
-      document.getElementById('msg-conversations').classList.add('hidden');
+      document.getElementById('msg-conversations').style.display = 'none';
       const tc = document.getElementById('msg-thread-container');
-      tc.classList.remove('hidden');
-      tc.classList.add('flex');
+      tc.style.display = 'flex';
       document.getElementById('msg-thread-name').textContent = name;
       const threadEl = document.getElementById('msg-thread');
       threadEl.innerHTML = '<div class="flex items-center justify-center py-8 text-[#4e4351]"><span class="material-symbols-outlined" style="animation:spin 1s linear infinite;">sync</span></div>';
@@ -746,8 +744,8 @@
         const data = await api.get('/api/messages');
         const total = (data.conversations || []).reduce((sum, c) => sum + c.unreadCount, 0);
         const badge = document.getElementById('msg-badge');
-        if (total > 0) { badge.textContent = total; badge.classList.remove('hidden'); }
-        else { badge.classList.add('hidden'); }
+        if (total > 0) { badge.textContent = total; badge.style.display = 'flex'; }
+        else { badge.style.display = 'none'; }
       } catch (_) {}
     }
     loadUnreadCount();
