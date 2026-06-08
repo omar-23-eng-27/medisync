@@ -629,15 +629,13 @@
     loadDashboard();
 
     // ── Rating modal ─────────────────────────────────────────────────────────
-    var _rateShiftId = null, _rateClaimId = null, _rateStars = 0;
-    console.log('[rate] functions defined, selectStar:', typeof selectStar, 'submitRating:', typeof submitRating);
+    var _rateShiftId = null, _rateClaimId = null, _rateStars = 0, _rateHover = 0;
 
     function openRateModal(shiftId, claimId, caregiverName) {
-      console.log('[rate] openRateModal', shiftId, claimId, caregiverName);
-      _rateShiftId = shiftId; _rateClaimId = claimId; _rateStars = 0;
+      _rateShiftId = shiftId; _rateClaimId = claimId; _rateStars = 0; _rateHover = 0;
       document.getElementById('rate-caregiver-name').textContent = caregiverName;
       document.getElementById('rate-error-text').style.display = 'none';
-      renderStars(0);
+      renderStars();
       document.getElementById('rate-modal').style.display = 'flex';
     }
 
@@ -645,43 +643,44 @@
       document.getElementById('rate-modal').style.display = 'none';
     }
 
-    function renderStars(hovered) {
-      var s = _rateStars;
+    function renderStars() {
+      var shown = _rateHover || _rateStars;
       var container = document.getElementById('rate-stars');
       container.innerHTML = [1,2,3,4,5].map(function(n) {
-        return '<button onclick="selectStar(' + n + ')" onmouseover="renderStars(' + n + ')" onmouseout="renderStars(' + s + ')"'
+        return '<button onclick="selectStar(' + n + ')" onmouseover="hoverStar(' + n + ')" onmouseout="hoverStar(0)"'
           + ' style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;'
-          + 'color:' + (n <= (hovered || s) ? '#f59e0b' : '#e5e7eb') + ';transition:color 0.1s;">'
+          + 'color:' + (n <= shown ? '#f59e0b' : '#e5e7eb') + ';transition:color 0.1s;">'
           + '★</button>';
       }).join('');
     }
 
+    function hoverStar(n) {
+      _rateHover = n;
+      renderStars();
+    }
+
     function selectStar(n) {
-      console.log('[rate] selectStar', n);
       _rateStars = n;
-      renderStars(n);
+      _rateHover = 0;
+      renderStars();
     }
 
     async function submitRating() {
-      console.log('[rate] submitRating called — stars:', _rateStars, 'shiftId:', _rateShiftId, 'claimId:', _rateClaimId);
       var errEl = document.getElementById('rate-error-text');
       errEl.style.display = 'none';
       if (!_rateStars) {
         errEl.textContent = 'Please select a star rating first.';
         errEl.style.display = 'block';
-        console.warn('[rate] no stars selected');
         return;
       }
       var btn = document.getElementById('rate-submit-btn');
       btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Submitting…';
       try {
         var result = await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
-        console.log('[rate] success:', result);
         showToast(_rateStars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
         closeRateModal();
         loadClaims(_rateShiftId);
       } catch (err) {
-        console.error('[rate] error:', err);
         errEl.textContent = err.message || 'Something went wrong.';
         errEl.style.display = 'block';
         btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Submit Rating';
