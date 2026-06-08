@@ -1,15 +1,7 @@
-const CACHE = 'medisync-v1';
+const CACHE = 'medisync-v2';
 const base = self.location.pathname.replace('/sw.js', '');
 
 const SHELL = [
-  base + '/',
-  base + '/index.html',
-  base + '/login.html',
-  base + '/dashboard.html',
-  base + '/shifts.html',
-  base + '/referrals.html',
-  base + '/profile.html',
-  base + '/facility.html',
   base + '/css/tailwind.css',
   base + '/js/config.js',
   base + '/js/api.js',
@@ -42,12 +34,23 @@ self.addEventListener('fetch', e => {
   if (url.includes('googleusercontent.com')) return;
   if (url.includes('fonts.g')) return;
 
+  // HTML pages: network-first so updates are always reflected immediately
+  const isHTML = e.request.headers.get('accept')?.includes('text/html') || url.endsWith('.html') || url.endsWith('/');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Static assets (CSS, JS, images): cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
       const networkFetch = fetch(e.request).then(res => {
-        if (res.ok) {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        }
+        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
         return res;
       }).catch(() => cached);
       return cached || networkFetch;
