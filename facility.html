@@ -629,13 +629,15 @@
     loadDashboard();
 
     // ── Rating modal ─────────────────────────────────────────────────────────
-    var _rateShiftId = null, _rateClaimId = null, _rateStars = 0, _rateHover = 0;
+    var _rateShiftId = null, _rateClaimId = null, _rateStars = 0;
 
     function openRateModal(shiftId, claimId, caregiverName) {
-      _rateShiftId = shiftId; _rateClaimId = claimId; _rateStars = 0; _rateHover = 0;
+      _rateShiftId = shiftId; _rateClaimId = claimId; _rateStars = 0;
       document.getElementById('rate-caregiver-name').textContent = caregiverName;
       document.getElementById('rate-error-text').style.display = 'none';
-      renderStars();
+      var btn = document.getElementById('rate-submit-btn');
+      btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Submit Rating';
+      buildStars();
       document.getElementById('rate-modal').style.display = 'flex';
     }
 
@@ -643,26 +645,38 @@
       document.getElementById('rate-modal').style.display = 'none';
     }
 
-    function renderStars() {
-      var shown = _rateHover || _rateStars;
+    function buildStars() {
       var container = document.getElementById('rate-stars');
-      container.innerHTML = [1,2,3,4,5].map(function(n) {
-        return '<button onclick="selectStar(' + n + ')" onmouseover="hoverStar(' + n + ')" onmouseout="hoverStar(0)"'
-          + ' style="background:none;border:none;cursor:pointer;padding:4px;font-size:36px;'
-          + 'color:' + (n <= shown ? '#f59e0b' : '#e5e7eb') + ';transition:color 0.1s;">'
-          + '★</button>';
-      }).join('');
+      container.innerHTML = '';
+      for (var i = 1; i <= 5; i++) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.star = i;
+        btn.textContent = '★';
+        btn.style.cssText = 'background:none;border:none;cursor:pointer;padding:4px;font-size:40px;color:#e5e7eb;line-height:1;';
+        container.appendChild(btn);
+      }
+      container.addEventListener('mouseover', function(e) {
+        var star = e.target.closest('button[data-star]');
+        if (!star) return;
+        paintStars(parseInt(star.dataset.star));
+      });
+      container.addEventListener('mouseout', function(e) {
+        if (!container.contains(e.relatedTarget)) paintStars(_rateStars);
+      });
+      container.addEventListener('click', function(e) {
+        var star = e.target.closest('button[data-star]');
+        if (!star) return;
+        _rateStars = parseInt(star.dataset.star);
+        paintStars(_rateStars);
+      });
     }
 
-    function hoverStar(n) {
-      _rateHover = n;
-      renderStars();
-    }
-
-    function selectStar(n) {
-      _rateStars = n;
-      _rateHover = 0;
-      renderStars();
+    function paintStars(n) {
+      var btns = document.querySelectorAll('#rate-stars button[data-star]');
+      btns.forEach(function(b) {
+        b.style.color = parseInt(b.dataset.star) <= n ? '#f59e0b' : '#e5e7eb';
+      });
     }
 
     async function submitRating() {
@@ -676,7 +690,7 @@
       var btn = document.getElementById('rate-submit-btn');
       btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Submitting…';
       try {
-        var result = await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
+        await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
         showToast(_rateStars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
         closeRateModal();
         loadClaims(_rateShiftId);

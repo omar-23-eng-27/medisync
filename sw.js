@@ -34,23 +34,23 @@ self.addEventListener('fetch', e => {
   if (url.includes('googleusercontent.com')) return;
   if (url.includes('fonts.g')) return;
 
-  // HTML pages: network-first so updates are always reflected immediately
+  // HTML pages: always fetch from network, never cache (ensures updates show immediately)
   const isHTML = e.request.headers.get('accept')?.includes('text/html') || url.endsWith('.html') || url.endsWith('/');
   if (isHTML) {
     e.respondWith(
-      fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        return res;
-      }).catch(() => caches.match(e.request))
+      fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
     );
     return;
   }
 
-  // Static assets (CSS, JS, images): cache-first
+  // Static assets (CSS, JS, images): cache-first, update in background
   e.respondWith(
     caches.match(e.request).then(cached => {
       const networkFetch = fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
         return res;
       }).catch(() => cached);
       return cached || networkFetch;
