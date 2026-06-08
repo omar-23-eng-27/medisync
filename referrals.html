@@ -419,6 +419,7 @@
         const codeEl = document.getElementById('referralCode');
         if (codeEl && stats.referralCode) codeEl.value = stats.referralCode;
 
+        updateRedeemButtons(stats.totalPoints);
         renderReferrals(referrals);
       } catch (err) {
         showToast(err.message, 'error');
@@ -532,22 +533,44 @@
     });
 
     // ── Redeem amount selection ─────────────────────────────────────────────
+    function setRedeemBtnStyle(btn, selected) {
+      if (btn.disabled) return;
+      const lbl = btn.querySelector('.redeem-label');
+      const pts = btn.querySelector('.redeem-pts');
+      if (selected) {
+        btn.style.background = '#5e0084';
+        btn.style.boxShadow = '0 4px 12px rgba(94,0,132,0.3)';
+        btn.style.borderColor = '#5e0084';
+        if (lbl) { lbl.style.color = '#fff'; }
+        if (pts) { pts.style.color = 'rgba(255,255,255,0.75)'; }
+      } else {
+        btn.style.background = '#fff';
+        btn.style.boxShadow = '';
+        btn.style.borderColor = '';
+        if (lbl) { lbl.style.color = '#5e0084'; }
+        if (pts) { pts.style.color = '#4e4351'; }
+      }
+    }
+
+    function updateRedeemButtons(totalPoints) {
+      document.querySelectorAll('.redeem-amount-btn').forEach(btn => {
+        const required = parseInt(btn.dataset.points);
+        const canAfford = totalPoints >= required;
+        btn.disabled = !canAfford;
+        btn.style.opacity = canAfford ? '1' : '0.4';
+        btn.style.cursor = canAfford ? 'pointer' : 'not-allowed';
+        if (!canAfford && selectedRedeemPoints === required) {
+          selectedRedeemPoints = 0;
+        }
+        if (!canAfford) setRedeemBtnStyle(btn, false);
+      });
+    }
+
     document.querySelectorAll('.redeem-amount-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.redeem-amount-btn').forEach(b => {
-          b.classList.remove('bg-primary', 'shadow-lg');
-          b.classList.add('bg-white');
-          const lbl = b.querySelector('.redeem-label');
-          const pts = b.querySelector('.redeem-pts');
-          if (lbl) { lbl.classList.remove('text-white'); lbl.classList.add('text-primary'); }
-          if (pts) { pts.classList.remove('text-white/70'); pts.classList.add('text-on-surface-variant'); }
-        });
-        this.classList.add('bg-primary', 'shadow-lg');
-        this.classList.remove('bg-white');
-        const lbl = this.querySelector('.redeem-label');
-        const pts = this.querySelector('.redeem-pts');
-        if (lbl) { lbl.classList.add('text-white'); lbl.classList.remove('text-primary'); }
-        if (pts) { pts.classList.add('text-white/70'); pts.classList.remove('text-on-surface-variant'); }
+        if (this.disabled) return;
+        document.querySelectorAll('.redeem-amount-btn').forEach(b => setRedeemBtnStyle(b, false));
+        setRedeemBtnStyle(this, true);
         selectedRedeemPoints = parseInt(this.dataset.points);
       });
     });
@@ -557,26 +580,21 @@
         showToast('Please select a redemption amount first.', 'error');
         return;
       }
-      const originalContent = this.innerHTML;
-      this.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;" class="material-symbols-outlined">sync</span>&nbsp;Processing...';
+      const cashPreview = (selectedRedeemPoints / 100).toFixed(2);
+      if (!confirm(`Redeem ${selectedRedeemPoints.toLocaleString()} points for $${cashPreview}?\n\nThis cannot be undone.`)) return;
+
+      this.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;display:inline-block;animation:spin 1s linear infinite;">sync</span>&nbsp;Processing…';
       this.disabled = true;
       try {
         const result = await api.redeemPoints(selectedRedeemPoints);
-        showToast(`Successfully redeemed $${result.cashValue.toFixed(2)}!`);
+        showToast(`Redeemed! $${result.cashValue.toFixed(2)} cashback is on its way.`);
         selectedRedeemPoints = 0;
-        document.querySelectorAll('.redeem-amount-btn').forEach(b => {
-          b.classList.remove('bg-primary', 'shadow-lg');
-          b.classList.add('bg-white');
-          const lbl = b.querySelector('.redeem-label');
-          const pts = b.querySelector('.redeem-pts');
-          if (lbl) { lbl.classList.remove('text-white'); lbl.classList.add('text-primary'); }
-          if (pts) { pts.classList.remove('text-white/70'); pts.classList.add('text-on-surface-variant'); }
-        });
-        loadReferrals();
+        document.querySelectorAll('.redeem-amount-btn').forEach(b => setRedeemBtnStyle(b, false));
+        await loadReferrals();
       } catch (err) {
         showToast(err.message, 'error');
       }
-      this.innerHTML = originalContent;
+      this.innerHTML = 'Redeem Now';
       this.disabled = false;
     });
 
