@@ -664,21 +664,25 @@
     }
 
     async function submitRating() {
+      console.log('[rate] submitRating called — stars:', _rateStars, 'shiftId:', _rateShiftId, 'claimId:', _rateClaimId);
       var errEl = document.getElementById('rate-error-text');
       errEl.style.display = 'none';
       if (!_rateStars) {
         errEl.textContent = 'Please select a star rating first.';
         errEl.style.display = 'block';
+        console.warn('[rate] no stars selected');
         return;
       }
       var btn = document.getElementById('rate-submit-btn');
       btn.disabled = true; btn.style.opacity = '0.7'; btn.textContent = 'Submitting…';
       try {
-        await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
+        var result = await api.post('/api/facility/shifts/' + _rateShiftId + '/claims/' + _rateClaimId + '/rate', { stars: _rateStars });
+        console.log('[rate] success:', result);
         showToast(_rateStars === 5 ? '5 stars! Caregiver earns 50 bonus points.' : 'Rating submitted!');
         closeRateModal();
         loadClaims(_rateShiftId);
       } catch (err) {
+        console.error('[rate] error:', err);
         errEl.textContent = err.message || 'Something went wrong.';
         errEl.style.display = 'block';
         btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Submit Rating';
